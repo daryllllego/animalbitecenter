@@ -8,7 +8,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Redirect to marketing dashboard as the primary view for the new site
-        return redirect()->route('marketing.dashboard');
+        // Redirect to animal bite dashboard as the primary view
+        return redirect()->route('animal-bite.dashboard');
     }
 }

@@ -1,0 +1,102 @@
+/* Modern Sidebar Styles based on provided design */
+
+/* Override template's default sidebar background */
+.deznav {
+    background: #ffffff !important;
+    border-right: 1px solid #f0f0f0 !important;
+    box-shadow: none !important;
+}
+
+.deznav .deznav-scroll {
+    background: #ffffff !important;
+}
+
+/* Remove default padding from menu */
+.modern-nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+}
+
+/* Section title */
+.modern-nav-section-title {
+    padding: 15px 25px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* List items */
+.modern-nav-menu li {
+    margin-bottom: 8px;
+}
+
+/* Link Base Styling */
+.modern-nav-menu .modern-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px 12px 25px;
+    color: #5a6a85;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    margin-right: 20px; /* Space on right for the rounded effect */
+    transition: all 0.3s ease;
+}
+
+.modern-nav-menu .modern-nav-link:hover {
+    color: #2953e8;
+    background-color: #f8f9fa;
+}
+
+/* Icon Container */
+.modern-nav-menu .modern-nav-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: #f4f7fa;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+.modern-nav-menu .modern-nav-icon svg {
+    stroke: #5a6a85;
+    width: 20px;
+    height: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Active State Styles */
+.modern-nav-menu li.active .modern-nav-link {
+    background-color: #2953e8;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(41, 83, 232, 0.25);
+}
+
+.modern-nav-menu li.active .modern-nav-icon {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modern-nav-menu li.active .modern-nav-icon svg {
+    stroke: #ffffff;
+}
+
+/* Footer overrides */
+.modern-sidebar-footer {
+    border-top: 1px solid #f0f0f0 !important;
+}
+
+.modern-sidebar-footer p {
+    color: #a0aec0 !important;
+}
+
+.modern-sidebar-footer strong {
+    color: #5a6a85 !important;
+}

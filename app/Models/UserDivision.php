@@ -9,11 +9,11 @@ class UserDivision extends Model
 {
     use HasFactory;
 
-    protected $table = 'division_user';
+    protected $table = 'user_divisions';
 
     protected $fillable = [
         'user_id',
-        'division',
+        'division_name',
     ];
 
     public function user()

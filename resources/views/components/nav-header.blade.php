@@ -1,6 +1,6 @@
 <div class="nav-header">
 	<a href="{{ $home ?? '/' }}" class="brand-logo">
-		<img src="{{ asset('images/intracode_full_logo-nobg.png') }}" alt="Intracode" style="height: 52px; width: auto; max-width: 250px; object-fit: contain; display: block;" />
+		<img src="{{ asset('images/cebuABC.png') }}" alt="Cebu Animal Bite Clinic" style="height: 52px; width: auto; max-width: 250px; object-fit: contain; display: block;" />
 	</a>
 
 	<div class="nav-control">

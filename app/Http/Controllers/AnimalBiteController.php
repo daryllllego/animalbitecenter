@@ -1,0 +1,277 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Patient;
+use App\Models\MasterlistEntry;
+use App\Models\Deduction;
+use App\Models\DailyRecord;
+use App\Models\CashRecord;
+use App\Models\Inventory;
+use App\Models\InventoryEntry;
+use Carbon\Carbon;
+
+class AnimalBiteController extends Controller
+{
+    public function setDate(Request $request)
+    {
+        $request->validate(['selected_date' => 'required|date']);
+        session(['selected_date' => $request->selected_date]);
+        return redirect()->back();
+    }
+
+    public function dashboard()
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        
+        $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+        
+        // Fetch Yesterday's Closing Cash
+        $yesterday = Carbon::parse($date)->subDay()->toDateString();
+        $prevClosingRecord = CashRecord::where('date', $yesterday)->where('shift', 'closing')->first();
+        $openingCash = $prevClosingRecord ? $prevClosingRecord->total_amount : 0;
+        
+        $totalPatients = MasterlistEntry::whereDate('created_at', $date)->count();
+        $totalSales = MasterlistEntry::whereDate('created_at', $date)->sum('amount_paid');
+        $totalDeductions = Deduction::whereDate('date', $date)->sum('amount');
+        
+        // New Calculations
+        $totalCashSales = $totalSales - $dailyRecord->online_sales;
+        $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
+
+        return view('animalbite.dashboard', [
+            'title' => 'Dashboard - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'stats' => [
+                'patients' => $totalPatients,
+                'sales' => $totalSales,
+                'deductions' => $totalDeductions,
+                'cash_sales' => $totalCashSales,
+                'expected_cash' => $netSales,
+                'online_sales' => $dailyRecord->online_sales,
+                'opening_cash' => $openingCash
+            ],
+            'selectedDate' => $date
+        ]);
+    }
+
+    public function cashOnHand()
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        
+        $opening = CashRecord::where('date', $date)->where('shift', 'opening')->first();
+        $closing = CashRecord::where('date', $date)->where('shift', 'closing')->first();
+        
+        // Carry-over logic for Opening if it doesn't exist
+        if (!$opening) {
+            $prevDate = Carbon::parse($date)->subDay()->toDateString();
+            $prevClosing = CashRecord::where('date', $prevDate)->where('shift', 'closing')->first();
+            if ($prevClosing) {
+                // Pre-fill opening with previous closing values
+                $opening = new CashRecord($prevClosing->toArray());
+                $opening->date = $date;
+                $opening->shift = 'opening';
+                $opening->exists = false; // Don't save it yet
+            }
+        }
+
+        return view('animalbite.cash-on-hand', [
+            'title' => 'Cash on Hand - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'opening' => $opening,
+            'closing' => $closing,
+            'selectedDate' => $date
+        ]);
+    }
+
+    public function storeCashRecord(Request $request)
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $validated = $request->validate([
+            'shift' => 'required|in:opening,closing',
+            'nurse_on_duty' => 'nullable|string',
+            'denom_1000' => 'integer|min:0',
+            'denom_500' => 'integer|min:0',
+            'denom_200' => 'integer|min:0',
+            'denom_100' => 'integer|min:0',
+            'denom_50' => 'integer|min:0',
+            'denom_20' => 'integer|min:0',
+            'denom_10' => 'integer|min:0',
+            'denom_5' => 'integer|min:0',
+            'denom_1' => 'integer|min:0',
+            'remarks' => 'nullable|string',
+            'total_amount' => 'required|numeric',
+        ]);
+
+        CashRecord::updateOrCreate(
+            ['date' => $date, 'shift' => $validated['shift']],
+            $validated
+        );
+
+        return redirect()->back()->with('success', 'Cash record saved successfully!');
+    }
+
+    public function patients()
+    {
+        $patients = Patient::latest()->get();
+        return view('animalbite.patients', [
+            'title' => 'Patient Management - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'patients' => $patients
+        ]);
+    }
+
+    public function storePatient(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'age' => 'required|integer',
+            'gender' => 'required|string',
+            'barangay' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'contact_number' => 'required|string|max:20',
+        ]);
+
+        Patient::create($validated);
+
+        return redirect()->back()->with('success', 'Patient added successfully!');
+    }
+
+    public function masterlist()
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $entries = MasterlistEntry::with('patient')->whereDate('created_at', $date)->latest()->get();
+        $patients = Patient::orderBy('name')->get();
+
+        return view('animalbite.masterlist', [
+            'title' => 'Masterlist - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'entries' => $entries,
+            'patients' => $patients,
+            'selectedDate' => $date
+        ]);
+    }
+
+    public function storeEntry(Request $request)
+    {
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'time' => 'required',
+            'dose_received' => 'required|string',
+            'animal_status' => 'nullable|string',
+            'amount_paid' => 'required|numeric',
+            'payment_method' => 'required|string',
+            'remarks' => 'nullable|string',
+        ]);
+
+        // Use the session date for the entry creation if it's the current date,
+        // but typically entries are for "Today".
+        // However, if the user wants to record data for the selected date:
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $validated['created_at'] = Carbon::parse($date)->setTimeFrom(Carbon::now());
+
+        MasterlistEntry::create($validated);
+
+        return redirect()->back()->with('success', 'Masterlist entry added successfully!');
+    }
+
+    public function storeDeduction(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric',
+            'description' => 'required|string|max:255',
+            'released_by' => 'required|string|max:255',
+            'released_to' => 'required|string|max:255',
+        ]);
+
+        $validated['date'] = session('selected_date', Carbon::today()->toDateString());
+
+        Deduction::create($validated);
+
+        return redirect()->back()->with('success', 'Deduction added successfully!');
+    }
+
+    public function updateDailyStats(Request $request)
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+
+        if ($request->has('online_sales')) {
+            $dailyRecord->update(['online_sales' => $request->online_sales]);
+        }
+
+        return redirect()->back()->with('success', 'Daily stats updated!');
+    }
+
+    public function inventory()
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        
+        $opening = Inventory::with('entries')->where('date', $date)->where('shift', 'opening')->first();
+        $closing = Inventory::with('entries')->where('date', $date)->where('shift', 'closing')->first();
+        $endorsement = Inventory::with('entries')->where('date', $date)->where('shift', 'endorsement')->first();
+        
+        // Carry-over logic for Opening if it doesn't exist
+        if (!$opening) {
+            $prevDate = Carbon::parse($date)->subDay()->toDateString();
+            $prevClosing = Inventory::with('entries')->where('date', $prevDate)->where('shift', 'closing')->first();
+            if ($prevClosing) {
+                // Pre-fill opening with previous closing entries
+                $opening = new Inventory(['date' => $date, 'shift' => 'opening']);
+                $opening->exists = false;
+                $opening->setRelation('entries', $prevClosing->entries->map(function($entry) {
+                    return new InventoryEntry([
+                        'vaccine_name' => $entry->vaccine_name,
+                        'quantity' => $entry->quantity,
+                        'received' => null,
+                        'transferred' => 0,
+                        'used' => 0
+                    ]);
+                }));
+            }
+        }
+
+        return view('animalbite.inventory', [
+            'title' => 'Vaccination Inventory - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'opening' => $opening,
+            'closing' => $closing,
+            'endorsement' => $endorsement,
+            'selectedDate' => $date
+        ]);
+    }
+
+    public function storeInventory(Request $request)
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $validated = $request->validate([
+            'shift' => 'required|in:opening,closing,endorsement',
+            'entries' => 'required|array',
+            'entries.*.vaccine_name' => 'required|string',
+            'entries.*.quantity' => 'required|integer',
+            'entries.*.received' => 'nullable|string',
+            'entries.*.transferred' => 'required|integer',
+            'entries.*.used' => 'required|integer',
+        ]);
+
+        $inventory = Inventory::updateOrCreate(
+            ['date' => $date, 'shift' => $validated['shift']]
+        );
+
+        foreach ($validated['entries'] as $entryData) {
+            $inventory->entries()->updateOrCreate(
+                ['vaccine_name' => $entryData['vaccine_name']],
+                $entryData
+            );
+        }
+
+        return redirect()->back()->with('success', 'Inventory saved successfully!');
+    }
+}
+

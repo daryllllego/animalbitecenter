@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intracode - Login</title>
+    <title>Cebu Animal Bite Clinic - Login</title>
     <link href="{{ asset('css/branding-override.css') }}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/intracode_logo-nobg.png') }}?v=1">
-    <link rel="apple-touch-icon" href="{{ asset('images/intracode_logo-nobg.png') }}?v=1">
+    <link rel="icon" type="image/png" href="{{ asset('images/cebuABC.png') }}?v=1">
+    <link rel="apple-touch-icon" href="{{ asset('images/cebuABC.png') }}?v=1">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,19 +22,19 @@
 <body>
     <div class="login-wrapper">
         <div class="decorative-background">
-            <div class="circle circle-1" style="background: rgba(48, 101, 208, 0.1);"></div>
-            <div class="circle circle-2" style="background: rgba(48, 101, 208, 0.05);"></div>
-            <div class="circle circle-3" style="background: rgba(48, 101, 208, 0.08);"></div>
+            <div class="circle circle-1" style="background: rgba(41, 83, 232, 0.1);"></div>
+            <div class="circle circle-2" style="background: rgba(41, 83, 232, 0.05);"></div>
+            <div class="circle circle-3" style="background: rgba(41, 83, 232, 0.08);"></div>
         </div>
         
         <div class="login-card">
             <!-- Left Panel - Logo and Branding -->
-            <div class="card-left" style="background: linear-gradient(135deg, #3065D0 0%, #6b84ff 100%);">
+            <div class="card-left" style="background: linear-gradient(135deg, #2953e8 0%, #4f73ff 100%);">
                 <div class="logo-wrapper">
-                    <img src="{{ asset('images/intracode_logo-nobg.png') }}" alt="Intracode Logo" class="logo" style="max-width: 150px;">
+                    <img src="{{ asset('images/cebuABC.png') }}" alt="Cebu Animal Bite Clinic Logo" class="logo" style="max-width: 150px;">
                 </div>
-                <h1 class="brand-title">Intracode</h1>
-                <p class="brand-subtitle">Enterprise Resource Planning</p>
+                <h1 class="brand-title">Cebu ABC</h1>
+                <p class="brand-subtitle">Animal Bite Center Management</p>
             </div>
 
             <!-- Right Panel - Login Form -->
@@ -84,18 +84,18 @@
                                 <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #666;">
                                     <input type="checkbox" name="remember"> Remember me
                                 </label>
-                                <a href="#" style="color: #3065D0; text-decoration: none; font-weight: 500;">Forgot password?</a>
+                                <a href="#" style="color: #2953e8; text-decoration: none; font-weight: 500;">Forgot password?</a>
                             </div>
                         </div>
 
-                    <button type="submit" class="btn-login" style="background: #3065D0;">
+                    <button type="submit" class="btn-login" style="background: #2953e8;">
                         <span>Sign In</span>
                         <i class="las la-arrow-right"></i>
                     </button>
                 </form>
 
                 <div class="form-footer">
-                    <p>&copy; {{ date('Y') }} Intracode. All rights reserved.</p>
+                    <p>&copy; {{ date('Y') }} Cebu Animal Bite Clinic. All rights reserved.</p>
                 </div>
             </div>
         </div>

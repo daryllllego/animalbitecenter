@@ -9,21 +9,22 @@
     <meta name="author" content="Intracode" />
     <meta name="robots" content="index, follow" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Intracode - Business Management System" />
-    <meta property="og:title" content="Intracode - Dashboard" />
-    <meta property="og:description" content="Intracode - Business Management System" />
+    <meta name="description" content="Cebu Animal Bite Clinic System" />
+    <meta property="og:title" content="Cebu ABC - Dashboard" />
+    <meta property="og:description" content="Cebu Animal Bite Clinic System" />
     <meta name="format-detection" content="telephone=no">
-    <title>{{ $title ?? 'Intracode - Dashboard' }}</title>
+    <title>{{ $title ?? 'Cebu ABC - Dashboard' }}</title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/intracode_logo-nobg.png') }}?v=1">
-    <link rel="apple-touch-icon" href="{{ asset('images/intracode_logo-nobg.png') }}?v=1">
+    <link rel="icon" type="image/png" href="{{ asset('images/cebuABC.png') }}?v=1">
+    <link rel="apple-touch-icon" href="{{ asset('images/cebuABC.png') }}?v=1">
     <link rel="stylesheet" href="{{ asset('vendor/chartist/css/chartist.min.css') }}">
     <link href="{{ asset('vendor/bootstrap-select/dist/css/bootstrap-select.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom-fix.css') }}" rel="stylesheet">
     <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
     <link href="{{ asset('css/branding-override.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/modern-sidebar.css') }}" rel="stylesheet">
     <style>
         @keyframes hidePreloader {
             0% { opacity: 1; visibility: visible; }
@@ -98,7 +99,7 @@
                 </div>
                 @endif
 
-                {{ $slot }}
+                @yield('content')
             </div>
         </div>
         <!--**********************************

@@ -26,20 +26,20 @@ class UserSeeder extends Seeder
 
         // 2. Create Default Admin User
         $user = User::updateOrCreate(
-            ['email' => 'admin@clarentian.com'],
+            ['email' => 'cabc@intracode.com'],
             [
-                'first_name' => 'Super',
+                'first_name' => 'Cebu ABC',
                 'last_name' => 'Admin',
                 'employee_number' => 'ADM-001',
-                'password' => Hash::make('admin123'),
-                'plain_password' => 'admin123',
-                'division' => 'Marketing Division',
+                'password' => Hash::make('123456789'),
+                'plain_password' => '123456789',
+                'division' => 'Animal Bite Center',
                 'position' => 'Super Admin',
                 'status' => true,
             ]
         );
 
-        // 3. Assign to Marketing Division (for sidebar logic)
-        $user->divisions()->updateOrCreate(['division_name' => 'Marketing Division']);
+        // 3. Assign to Animal Bite Center
+        $user->divisions()->updateOrCreate(['division_name' => 'Animal Bite Center']);
     }
 }

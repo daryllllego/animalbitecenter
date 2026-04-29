@@ -4,11 +4,73 @@
 	<div class="header-content">
 		<nav class="navbar navbar-expand">
 			<div class="collapse navbar-collapse justify-content-between">
-				<div class="header-left">
+				<div class="header-left d-flex align-items-center">
 					<div class="dashboard_bar" data-page-title>
 						{{ $title }}
 					</div>
+                    <form action="{{ route('animal-bite.set-date') }}" method="POST" class="ms-4" id="global-date-form">
+                        @csrf
+                        <div class="date-filter-wrapper">
+                            <label class="date-filter-label">SELECT DATE</label>
+                            <div class="date-input-container">
+                                <i class="fa fa-calendar-alt calendar-icon"></i>
+                                <input type="date" name="selected_date" 
+                                    value="{{ session('selected_date', date('Y-m-d')) }}"
+                                    onchange="document.getElementById('global-date-form').submit()"
+                                    class="modern-date-input">
+                            </div>
+                        </div>
+                    </form>
 				</div>
+                <style>
+                    .date-filter-wrapper {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                    }
+                    .date-filter-label {
+                        font-size: 9px;
+                        font-weight: 800;
+                        color: #2953e8;
+                        letter-spacing: 1px;
+                        margin-bottom: 2px;
+                        margin-left: 2px;
+                    }
+                    .date-input-container {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .calendar-icon {
+                        position: absolute;
+                        left: 12px;
+                        color: #2953e8;
+                        font-size: 14px;
+                        pointer-events: none;
+                    }
+                    .modern-date-input {
+                        padding: 8px 12px 8px 35px;
+                        border-radius: 10px;
+                        border: 2px solid #e2e8f0;
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #1e293b;
+                        background-color: #f8fafc;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        outline: none;
+                    }
+                    .modern-date-input:hover {
+                        border-color: #2953e8;
+                        background-color: white;
+                        box-shadow: 0 4px 12px rgba(41, 83, 232, 0.1);
+                    }
+                    .modern-date-input:focus {
+                        border-color: #2953e8;
+                        background-color: white;
+                        box-shadow: 0 0 0 4px rgba(41, 83, 232, 0.1);
+                    }
+                </style>
 				<ul class="navbar-nav header-right">
 					<li class="nav-item dropdown header-profile">
 						<a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" data-toggle="dropdown">
@@ -28,25 +90,7 @@
 								<span class="ms-2">Profile </span>
 							</a>
 							
-@php
-    $user = auth()->user();
-    $isMarketing = str_contains(strtolower($user->division), 'marketing') || $user->position === 'Super Admin';
-@endphp
 
-@if(auth()->check() && $isMarketing)
-    <div class="dropdown-divider"></div>
-    <a href="{{ route('marketing.dashboard') }}" class="dropdown-item ai-icon {{ request()->routeIs('marketing.dashboard') ? 'active' : '' }}">
-        <svg id="icon-marketing" xmlns="http://www.w3.org/2000/svg" class="text-primary"
-            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-        </svg>
-        <span class="ms-2">Intracode Dashboard</span>
-    </a>
-@endif
-							
 							<div class="dropdown-divider"></div>
 							
 							<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
