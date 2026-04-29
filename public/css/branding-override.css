@@ -1,0 +1,139 @@
+/* 
+    Intracode Ultimate Branding Override 
+    This file forces all primary colors and hover states to Intracode Blue.
+*/
+
+:root {
+    --primary: #3065D0 !important;
+    --primary-hover: #2552a3 !important;
+    --secondary: #2552a3 !important;
+    --danger: #3065D0 !important;
+    /* Force danger to also be blue for this project */
+}
+
+/* Direct Class Overrides for All Buttons */
+.btn-primary,
+.btn-danger,
+.btn-info,
+.btn-secondary,
+.btn-warning,
+.btn-success,
+.btn-dark,
+.btn-outline-primary:hover,
+.btn-outline-danger:hover,
+.btn-outline-warning:hover {
+    background-color: #3065D0 !important;
+    border-color: #3065D0 !important;
+    color: #fff !important;
+}
+
+.btn-primary:hover,
+.btn-danger:hover,
+.btn-info:hover,
+.btn-secondary:hover,
+.btn-warning:hover,
+.btn-success:hover,
+.btn-dark:hover,
+.btn-primary:focus,
+.btn-danger:focus,
+.btn-info:focus,
+.btn-secondary:focus,
+.btn-warning:focus,
+.btn-success:focus,
+.btn-primary:active,
+.btn-danger:active,
+.btn-info:active,
+.btn-secondary:active,
+.btn-warning:active,
+.btn-success:active {
+    background-color: #2552a3 !important;
+    border-color: #2552a3 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(48, 101, 208, 0.4) !important;
+}
+
+/* Outline Buttons */
+.btn-outline-primary,
+.btn-outline-danger,
+.btn-outline-warning,
+.btn-outline-info {
+    border-color: #3065D0 !important;
+    color: #3065D0 !important;
+}
+
+/* Badge Overrides */
+.badge-primary,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-success {
+    background-color: #3065D0 !important;
+    color: #fff !important;
+}
+
+/* Form Controls */
+.form-control:focus {
+    border-color: #3065D0 !important;
+    box-shadow: 0 0 0 0.2rem rgba(48, 101, 208, 0.25) !important;
+}
+
+/* Pagination */
+.page-link {
+    color: #3065D0 !important;
+}
+
+.page-item.active .page-link {
+    background-color: #3065D0 !important;
+    border-color: #3065D0 !important;
+}
+
+/* Sidebar Menu Tweaks */
+.modern-nav-item.active {
+    background-color: #3065D0 !important;
+}
+
+.modern-nav-item:hover {
+    background-color: rgba(48, 101, 208, 0.1) !important;
+    color: #3065D0 !important;
+}
+
+/* Transitions for Smoothness */
+.btn,
+.nav-link,
+.modern-nav-item,
+.page-link {
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Global Shadow Management */
+.btn,
+.card,
+.modal-content {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn:hover {
+    background-color: #1a45a1 !important;
+    /* Darker Blue for better contrast on hover */
+    border-color: #1a45a1 !important;
+    box-shadow: 0 8px 25px rgba(48, 101, 208, 0.3) !important;
+    transform: translateY(-1px);
+}
+
+/* Chartist & Other SVG Colors */
+.ct-series-a .ct-bar,
+.ct-series-a .ct-line,
+.ct-series-a .ct-point,
+.ct-series-a .ct-slice-donut {
+    stroke: #3065D0 !important;
+}
+
+.ct-series-a .ct-area,
+.ct-series-a .ct-slice-pie {
+    fill: #3065D0 !important;
+}
+
+/* Table Borders */
+.table thead th {
+    border-bottom: 2px solid #3065D0 !important;
+}
