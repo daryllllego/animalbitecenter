@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\HasBranch;
+
 class CashRecord extends Model
 {
-    use HasFactory;
+    use HasFactory, HasBranch;
 
     protected $fillable = [
+        'branch',
         'date',
         'shift',
         'nurse_on_duty',

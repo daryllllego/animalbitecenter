@@ -16,8 +16,17 @@ class AnimalBiteController extends Controller
 {
     public function setDate(Request $request)
     {
-        $request->validate(['selected_date' => 'required|date']);
+        $request->validate([
+            'selected_date' => 'required|date',
+            'selected_branch' => 'nullable|string'
+        ]);
+        
         session(['selected_date' => $request->selected_date]);
+        
+        if (auth()->user()->is_super_admin && $request->has('selected_branch')) {
+            session(['selected_branch' => $request->selected_branch]);
+        }
+        
         return redirect()->back();
     }
 
@@ -272,6 +281,106 @@ class AnimalBiteController extends Controller
         }
 
         return redirect()->back()->with('success', 'Inventory saved successfully!');
+    }
+
+    public function monthlyReport(Request $request)
+    {
+        if (!auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $month = $request->get('month', Carbon::now()->format('m'));
+        $year = $request->get('year', Carbon::now()->format('Y'));
+        
+        $selectedBranch = session('selected_branch', 'All Branches');
+
+        $query = MasterlistEntry::query()
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year);
+
+        $deductionsQuery = Deduction::query()
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year);
+
+        $dailyRecordsQuery = DailyRecord::query()
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year);
+
+        $results = [];
+
+        if ($selectedBranch === 'All Branches') {
+            // Group by branch
+            $salesData = $query->selectRaw('branch, SUM(amount_paid) as total_sales, COUNT(*) as total_patients')
+                ->groupBy('branch')
+                ->get()
+                ->keyBy('branch');
+
+            $deductionsData = $deductionsQuery->selectRaw('branch, SUM(amount) as total_deductions')
+                ->groupBy('branch')
+                ->get()
+                ->keyBy('branch');
+
+            $onlineSalesData = $dailyRecordsQuery->selectRaw('branch, SUM(online_sales) as total_online_sales')
+                ->groupBy('branch')
+                ->get()
+                ->keyBy('branch');
+
+            $branches = [
+                'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
+                'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
+                'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
+                'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'
+            ];
+
+            foreach ($branches as $branch) {
+                if ($salesData->has($branch) || $deductionsData->has($branch) || $onlineSalesData->has($branch)) {
+                    $results[$branch] = [
+                        'sales' => $salesData->get($branch)->total_sales ?? 0,
+                        'patients' => $salesData->get($branch)->total_patients ?? 0,
+                        'deductions' => $deductionsData->get($branch)->total_deductions ?? 0,
+                        'online_sales' => $onlineSalesData->get($branch)->total_online_sales ?? 0,
+                    ];
+                }
+            }
+            
+            $totalSales = $salesData->sum('total_sales');
+            $totalPatients = $salesData->sum('total_patients');
+            $totalDeductions = $deductionsData->sum('total_deductions');
+            $totalOnlineSales = $onlineSalesData->sum('total_online_sales');
+
+        } else {
+            // Single branch (already filtered by scope)
+            $totalSales = $query->sum('amount_paid');
+            $totalPatients = $query->count();
+            $totalDeductions = $deductionsQuery->sum('amount');
+            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
+            
+            $results[$selectedBranch] = [
+                'sales' => $totalSales,
+                'patients' => $totalPatients,
+                'deductions' => $totalDeductions,
+                'online_sales' => $totalOnlineSales,
+            ];
+        }
+
+        $totalCashSales = $totalSales - $totalOnlineSales;
+        $netSales = $totalSales - $totalDeductions;
+
+        return view('animalbite.monthly-report', [
+            'title' => 'Monthly Report - ' . Carbon::create()->month($month)->format('F') . ' ' . $year,
+            'role' => auth()->user()->position,
+            'sidebar' => 'animal-bite',
+            'month' => $month,
+            'year' => $year,
+            'results' => $results,
+            'totalSales' => $totalSales,
+            'totalPatients' => $totalPatients,
+            'totalDeductions' => $totalDeductions,
+            'totalOnlineSales' => $totalOnlineSales,
+            'totalCashSales' => $totalCashSales,
+            'netSales' => $netSales,
+            'selectedBranch' => $selectedBranch
+        ]);
     }
 }
 

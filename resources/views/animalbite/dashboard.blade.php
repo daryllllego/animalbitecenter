@@ -59,7 +59,7 @@
 @section('content')
 <div class="row">
     <div class="col-12 mb-4">
-        <h2 class="text-primary font-w600">CEBU ANIMAL BITE CLINIC - MANDAUE BRANCH</h2>
+        <h2 class="text-primary font-w600">CEBU ANIMAL BITE CLINIC - {{ auth()->user()->is_super_admin && session('selected_branch') != 'All Branches' ? strtoupper(session('selected_branch')) : (auth()->user()->is_super_admin ? 'ALL BRANCHES' : strtoupper(auth()->user()->branch)) }}</h2>
         <p class="text-muted">Filtered Date: <span class="badge bg-primary px-3 py-2" style="font-size: 14px;">{{ \Carbon\Carbon::parse($selectedDate)->format('F d, Y') }}</span></p>
     </div>
 </div>
@@ -114,14 +114,13 @@
     <div class="col-xl-3 col-sm-6 mb-4">
         <div class="card kpi-card bg-secondary-light border-start border-secondary border-4">
             <div class="card-body">
-                <div class="kpi-title">TOTAL ONLINE SALES</div>
-                <form action="{{ route('animal-bite.update-daily-stats') }}" method="POST">
-                    @csrf
-                    <div class="input-group mt-2">
-                        <span class="input-group-text border-0 bg-transparent">₱</span>
-                        <input type="number" step="0.01" name="online_sales" class="kpi-input" value="{{ $stats['online_sales'] }}" onchange="this.form.submit()">
-                    </div>
-                </form>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="kpi-title">TOTAL ONLINE SALES</div>
+                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary" data-bs-toggle="modal" data-bs-target="#editOnlineSalesModal">
+                        <i class="fa fa-pencil-alt"></i>
+                    </button>
+                </div>
+                <div class="kpi-value text-secondary">₱ {{ number_format($stats['online_sales'], 2) }}</div>
             </div>
         </div>
     </div>
@@ -207,6 +206,38 @@
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger px-4">Save Deduction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Edit Online Sales Modal -->
+<div class="modal fade" id="editOnlineSalesModal" tabindex="-1" aria-labelledby="editOnlineSalesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header bg-secondary text-white" style="border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title text-white" id="editOnlineSalesModalLabel">
+                    <i class="fa fa-edit me-2"></i>Edit Online Sales
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('animal-bite.update-daily-stats') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="online_sales" class="form-label font-weight-bold text-dark">Total Online Sales Amount</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-secondary text-white border-secondary">₱</span>
+                            <input type="number" step="0.01" class="form-control border-secondary font-weight-bold" id="online_sales" name="online_sales" value="{{ $stats['online_sales'] }}" required autofocus>
+                        </div>
+                        <small class="text-muted mt-2 d-block">This amount will be subtracted from Total Sales to calculate Total Cash Sales.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-secondary px-4 text-white" style="border-radius: 8px;">
+                        <i class="fa fa-check me-2"></i>Update Amount
+                    </button>
                 </div>
             </form>
         </div>

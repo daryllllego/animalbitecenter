@@ -27,16 +27,25 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        // Simple bypass: Log in the first available user (Admin) regardless of credentials
-        $user = \App\Models\User::first();
-        
-        if ($user) {
-            Auth::login($user);
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('marketing.dashboard'));
+            
+            // Set default branch for super admin if not set
+            if (Auth::user()->is_super_admin && !session('selected_branch')) {
+                session(['selected_branch' => 'All Branches']);
+            }
+            
+            return redirect()->intended(route('animal-bite.dashboard'));
         }
 
-        return back()->with('error', 'No users found in database. Please run migrations and seeders.');
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
     /**

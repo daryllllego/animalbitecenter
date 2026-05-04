@@ -29,7 +29,9 @@ class User extends Authenticatable
         'division',
         'department',
         'position',
+        'branch',
         'status',
+        'is_super_admin',
     ];
 
     /**

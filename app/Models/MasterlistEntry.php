@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\HasBranch;
+
 class MasterlistEntry extends Model
 {
-    use HasFactory;
+    use HasFactory, HasBranch;
 
     protected $fillable = [
+        'branch',
         'patient_id',
         'time',
         'dose_received',

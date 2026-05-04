@@ -8,18 +8,42 @@
 					<div class="dashboard_bar" data-page-title>
 						{{ $title }}
 					</div>
-                    <form action="{{ route('animal-bite.set-date') }}" method="POST" class="ms-4" id="global-date-form">
+                    <form action="{{ route('animal-bite.set-date') }}" method="POST" class="ms-4 d-flex align-items-center" id="global-filter-form">
                         @csrf
-                        <div class="date-filter-wrapper">
+                        <div class="date-filter-wrapper me-4">
                             <label class="date-filter-label">SELECT DATE</label>
                             <div class="date-input-container">
                                 <i class="fa fa-calendar-alt calendar-icon"></i>
                                 <input type="date" name="selected_date" 
                                     value="{{ session('selected_date', date('Y-m-d')) }}"
-                                    onchange="document.getElementById('global-date-form').submit()"
+                                    onchange="document.getElementById('global-filter-form').submit()"
                                     class="modern-date-input">
                             </div>
                         </div>
+
+                        @if(auth()->user()->is_super_admin)
+                        <div class="date-filter-wrapper">
+                            <label class="date-filter-label">SELECT BRANCH</label>
+                            <div class="date-input-container">
+                                <i class="fa fa-map-marker-alt calendar-icon"></i>
+                                <select name="selected_branch" onchange="document.getElementById('global-filter-form').submit()" class="modern-date-input" style="padding-right: 40px; -webkit-appearance: none;">
+                                    <option value="All Branches" {{ session('selected_branch') == 'All Branches' ? 'selected' : '' }}>All Branches</option>
+                                    @php
+                                        $branches = [
+                                            'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
+                                            'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
+                                            'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
+                                            'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'
+                                        ];
+                                    @endphp
+                                    @foreach($branches as $branch)
+                                        <option value="{{ $branch }}" {{ session('selected_branch') == $branch ? 'selected' : '' }}>{{ $branch }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa fa-chevron-down" style="position: absolute; right: 12px; color: #2953e8; pointer-events: none;"></i>
+                            </div>
+                        </div>
+                        @endif
                     </form>
 				</div>
                 <style>
@@ -29,11 +53,11 @@
                         justify-content: center;
                     }
                     .date-filter-label {
-                        font-size: 9px;
+                        font-size: 12px;
                         font-weight: 800;
                         color: #2953e8;
                         letter-spacing: 1px;
-                        margin-bottom: 2px;
+                        margin-bottom: 4px;
                         margin-left: 2px;
                     }
                     .date-input-container {
@@ -45,14 +69,14 @@
                         position: absolute;
                         left: 12px;
                         color: #2953e8;
-                        font-size: 14px;
+                        font-size: 16px;
                         pointer-events: none;
                     }
                     .modern-date-input {
-                        padding: 8px 12px 8px 35px;
+                        padding: 10px 15px 10px 40px;
                         border-radius: 10px;
                         border: 2px solid #e2e8f0;
-                        font-size: 13px;
+                        font-size: 15px;
                         font-weight: 700;
                         color: #1e293b;
                         background-color: #f8fafc;
@@ -87,7 +111,7 @@
 									<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
 									<circle cx="12" cy="7" r="4"></circle>
 								</svg>
-								<span class="ms-2">Profile </span>
+								<span class="ms-2">Change pass </span>
 							</a>
 							
 

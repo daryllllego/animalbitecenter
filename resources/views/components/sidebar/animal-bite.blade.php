@@ -12,17 +12,29 @@
                 <span class="modern-nav-text">Dashboard</span>
             </a>
         </li>
-        <li class="{{ request()->routeIs('animal-bite.cash-on-hand') ? 'active' : '' }}">
-            <a href="{{ route('animal-bite.cash-on-hand') }}" class="modern-nav-link">
+        
+        @if(auth()->user()->is_super_admin)
+        <li class="{{ request()->routeIs('animal-bite.monthly-report') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.monthly-report') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                        <path d="M8 14h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M16 14h.01"></path>
+                        <path d="M8 18h.01"></path>
+                        <path d="M12 18h.01"></path>
+                        <path d="M16 18h.01"></path>
                     </svg>
                 </div>
-                <span class="modern-nav-text">Cash on Hand</span>
+                <span class="modern-nav-text">Monthly Report</span>
             </a>
         </li>
+        @endif
+
         <li class="{{ request()->routeIs('animal-bite.patients') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.patients') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
@@ -36,6 +48,19 @@
                 <span class="modern-nav-text">Patient Management</span>
             </a>
         </li>
+
+        <li class="{{ request()->routeIs('animal-bite.cash-on-hand') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.cash-on-hand') }}" class="modern-nav-link">
+                <div class="modern-nav-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <span class="modern-nav-text">Cash on Hand</span>
+            </a>
+        </li>
+
         <li class="{{ request()->routeIs('animal-bite.masterlist') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.masterlist') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
