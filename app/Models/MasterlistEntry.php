@@ -20,6 +20,7 @@ class MasterlistEntry extends Model
         'amount_paid',
         'payment_method',
         'remarks',
+        'nurse',
     ];
 
     public function patient()

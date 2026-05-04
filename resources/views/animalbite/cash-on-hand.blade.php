@@ -74,7 +74,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-4">
                                     <label class="small font-weight-bold text-muted">NURSE ON DUTY</label>
-                                    <input type="text" name="nurse_on_duty" class="nurse-duty-input" value="{{ $opening->nurse_on_duty ?? '' }}">
+                                    <input type="text" name="nurse_on_duty" class="nurse-duty-input" value="{{ $opening->nurse_on_duty ?: auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -136,7 +136,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-4">
                                     <label class="small font-weight-bold text-muted">NURSE ON DUTY</label>
-                                    <input type="text" name="nurse_on_duty" class="nurse-duty-input" value="{{ $closing->nurse_on_duty ?? '' }}">
+                                    <input type="text" name="nurse_on_duty" class="nurse-duty-input" value="{{ $closing->nurse_on_duty ?: auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
                                 </div>
                             </div>
                             <div class="table-responsive">

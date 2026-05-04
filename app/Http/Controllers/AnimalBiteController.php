@@ -82,6 +82,7 @@ class AnimalBiteController extends Controller
                 $opening = new CashRecord($prevClosing->toArray());
                 $opening->date = $date;
                 $opening->shift = 'opening';
+                $opening->nurse_on_duty = null; // Reset so it auto-fills with the current logged-in nurse
                 $opening->exists = false; // Don't save it yet
             }
         }
@@ -183,6 +184,9 @@ class AnimalBiteController extends Controller
         // However, if the user wants to record data for the selected date:
         $date = session('selected_date', Carbon::today()->toDateString());
         $validated['created_at'] = Carbon::parse($date)->setTimeFrom(Carbon::now());
+        
+        // Record the nurse who inputted the entry
+        $validated['nurse'] = auth()->user()->first_name . ' ' . auth()->user()->last_name;
 
         MasterlistEntry::create($validated);
 
@@ -437,7 +441,7 @@ class AnimalBiteController extends Controller
 
             // Detailed Transactions Section
             fputcsv($file, ["DETAILED TRANSACTIONS"]);
-            fputcsv($file, ["Patient Name", "Time", "Dose", "Amount Paid", "Payment Method", "Branch"]);
+            fputcsv($file, ["Patient Name", "Time", "Dose", "Amount Paid", "Payment Method", "Nurse", "Branch"]);
 
             $entriesQuery = MasterlistEntry::with('patient')->whereDate('created_at', $date);
             if ($branch !== 'All Branches') {
@@ -451,6 +455,7 @@ class AnimalBiteController extends Controller
                     $entry->dose_received,
                     $entry->amount_paid,
                     $entry->payment_method,
+                    $entry->nurse ?? 'N/A',
                     $entry->branch
                 ]);
             }

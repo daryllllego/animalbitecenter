@@ -72,6 +72,7 @@
                                 <th>AMOUNT PAID</th>
                                 <th>PAYMENT METHOD</th>
                                 <th>REMARKS</th>
+                                <th>NURSE</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,6 +94,7 @@
                                 <td>₱ {{ number_format($entry->amount_paid, 2) }}</td>
                                 <td>{{ $entry->payment_method }}</td>
                                 <td class="text-start">{{ $entry->remarks }}</td>
+                                <td class="font-weight-bold text-primary">{{ $entry->nurse ?? 'N/A' }}</td>
                             </tr>
                             @endforeach
                         </tbody>
