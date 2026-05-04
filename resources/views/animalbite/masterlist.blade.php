@@ -42,7 +42,18 @@
         border-radius: 20px;
         padding: 4px 12px;
     }
+    .select2-container .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #ced4da !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
 </style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endpush
 
 @section('content')
@@ -73,6 +84,7 @@
                                 <th>PAYMENT METHOD</th>
                                 <th>REMARKS</th>
                                 <th>NURSE</th>
+                                <th>ACTION</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -95,6 +107,28 @@
                                 <td>{{ $entry->payment_method }}</td>
                                 <td class="text-start">{{ $entry->remarks }}</td>
                                 <td class="font-weight-bold text-primary">{{ $entry->nurse ?? 'N/A' }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm rounded-circle edit-entry" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editEntryModal"
+                                            data-id="{{ $entry->id }}"
+                                            data-patient-id="{{ $entry->patient_id }}"
+                                            data-time="{{ \Carbon\Carbon::parse($entry->time)->format('H:i') }}"
+                                            data-dose="{{ $entry->dose_received }}"
+                                            data-animal-status="{{ $entry->animal_status }}"
+                                            data-amount="{{ $entry->amount_paid }}"
+                                            data-payment="{{ $entry->payment_method }}"
+                                            data-remarks="{{ $entry->remarks }}">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <form action="{{ route('animal-bite.masterlist.destroy', $entry->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm rounded-circle" onclick="return confirm('Delete this entry?')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -119,7 +153,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="patient_id" class="form-label">Select Patient</label>
-                            <select class="form-control" id="patient_id" name="patient_id" required>
+                            <select class="form-control searchable-select" id="patient_id" name="patient_id" required>
                                 <option value="" selected disabled>-- Choose Patient --</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->age }}y/o, {{ $patient->city }})</option>
@@ -173,10 +207,79 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Entry Modal -->
+<div class="modal fade" id="editEntryModal" tabindex="-1" aria-labelledby="editEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white" id="editEntryModalLabel">Edit Masterlist Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editEntryForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_patient_id" class="form-label">Select Patient</label>
+                            <select class="form-control searchable-select" id="edit_patient_id" name="patient_id" required>
+                                @foreach($patients as $patient)
+                                    <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->age }}y/o, {{ $patient->city }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_time" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="edit_time" name="time" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_dose_received" class="form-label">Dose Received</label>
+                            <input type="text" class="form-control" id="edit_dose_received" name="dose_received" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_animal_status" class="form-label">Status of Animal</label>
+                            <input type="text" class="form-control" id="edit_animal_status" name="animal_status">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_amount_paid" class="form-label">Amount Paid</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" step="0.01" class="form-control" id="edit_amount_paid" name="amount_paid" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_payment_method" class="form-label">Payment Method</label>
+                            <select class="form-control" id="edit_payment_method" name="payment_method" required>
+                                <option value="CASH">CASH</option>
+                                <option value="GCASH">GCASH</option>
+                                <option value="BPI">BPI</option>
+                                <option value="BDO">BDO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="edit_remarks" name="remarks" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#masterlistTable').DataTable({
@@ -190,6 +293,41 @@
                     "previous": '<i class="fa fa-angle-left"></i>' 
                 }
             }
+        });
+
+        // Initialize Select2
+        $('.searchable-select').select2({
+            dropdownParent: $('#addEntryModal'),
+            width: '100%'
+        });
+
+        // Fix Select2 in Edit Modal
+        $('#editEntryModal').on('shown.bs.modal', function () {
+            $('#edit_patient_id').select2({
+                dropdownParent: $('#editEntryModal'),
+                width: '100%'
+            });
+        });
+
+        $('.edit-entry').on('click', function() {
+            const id = $(this).data('id');
+            const patientId = $(this).data('patient-id');
+            const time = $(this).data('time');
+            const dose = $(this).data('dose');
+            const animalStatus = $(this).data('animal-status');
+            const amount = $(this).data('amount');
+            const payment = $(this).data('payment');
+            const remarks = $(this).data('remarks');
+
+            $('#edit_patient_id').val(patientId).trigger('change');
+            $('#edit_time').val(time);
+            $('#edit_dose_received').val(dose);
+            $('#edit_animal_status').val(animalStatus);
+            $('#edit_amount_paid').val(amount);
+            $('#edit_payment_method').val(payment);
+            $('#edit_remarks').val(remarks);
+            
+            $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
         });
     });
 </script>

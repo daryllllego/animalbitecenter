@@ -33,8 +33,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cash-on-hand', [AnimalBiteController::class, 'cashOnHand'])->name('cash-on-hand');
         Route::get('/patients', [AnimalBiteController::class, 'patients'])->name('patients');
         Route::post('/patients', [AnimalBiteController::class, 'storePatient'])->name('patients.store');
+        Route::put('/patients/{patient}', [AnimalBiteController::class, 'updatePatient'])->name('patients.update');
+        Route::delete('/patients/{patient}', [AnimalBiteController::class, 'destroyPatient'])->name('patients.destroy');
+
         Route::get('/masterlist', [AnimalBiteController::class, 'masterlist'])->name('masterlist');
         Route::post('/masterlist', [AnimalBiteController::class, 'storeEntry'])->name('masterlist.store');
+        Route::put('/masterlist/{entry}', [AnimalBiteController::class, 'updateEntry'])->name('masterlist.update');
+        Route::delete('/masterlist/{entry}', [AnimalBiteController::class, 'destroyEntry'])->name('masterlist.destroy');
         Route::post('/deductions', [AnimalBiteController::class, 'storeDeduction'])->name('deductions.store');
         Route::post('/set-date', [AnimalBiteController::class, 'setDate'])->name('set-date');
         Route::post('/update-daily-stats', [AnimalBiteController::class, 'updateDailyStats'])->name('update-daily-stats');

@@ -193,6 +193,49 @@ class AnimalBiteController extends Controller
         return redirect()->back()->with('success', 'Masterlist entry added successfully!');
     }
 
+    public function updateEntry(Request $request, MasterlistEntry $entry)
+    {
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'time' => 'required',
+            'dose_received' => 'required|string',
+            'animal_status' => 'nullable|string',
+            'amount_paid' => 'required|numeric',
+            'payment_method' => 'required|string',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $entry->update($validated);
+        return redirect()->back()->with('success', 'Masterlist entry updated successfully!');
+    }
+
+    public function destroyEntry(MasterlistEntry $entry)
+    {
+        $entry->delete();
+        return redirect()->back()->with('success', 'Masterlist entry deleted successfully!');
+    }
+
+    public function updatePatient(Request $request, Patient $patient)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'age' => 'required|integer',
+            'gender' => 'required|string',
+            'barangay' => 'required|string',
+            'city' => 'required|string',
+            'contact_number' => 'required|string',
+        ]);
+
+        $patient->update($validated);
+        return redirect()->back()->with('success', 'Patient updated successfully!');
+    }
+
+    public function destroyPatient(Patient $patient)
+    {
+        $patient->delete();
+        return redirect()->back()->with('success', 'Patient deleted successfully!');
+    }
+
     public function storeDeduction(Request $request)
     {
         $validated = $request->validate([
