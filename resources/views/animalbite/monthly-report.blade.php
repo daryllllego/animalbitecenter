@@ -37,9 +37,16 @@
 
 @section('content')
     <div class="row">
-        <div class="col-12 mb-4">
-            <h2 class="text-primary font-w600">MONTHLY SALES & PATIENT REPORT</h2>
-            <p class="text-muted">Viewing: <span class="badge bg-primary px-3 py-2" style="font-size: 14px;">{{ $selectedBranch }}</span> for <span class="badge bg-info px-3 py-2" style="font-size: 14px;">{{ \Carbon\Carbon::create()->month($month)->format('F') }} {{ $year }}</span></p>
+        <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="text-primary font-w600">MONTHLY SALES & PATIENT REPORT</h2>
+                <p class="text-muted">Viewing: <span class="badge bg-primary px-3 py-2" style="font-size: 14px;">{{ $selectedBranch }}</span> for <span class="badge bg-info px-3 py-2" style="font-size: 14px;">{{ \Carbon\Carbon::create()->month($month)->format('F') }} {{ $year }}</span></p>
+            </div>
+            <div>
+                <a href="{{ route('animal-bite.export-monthly', ['month' => $month, 'year' => $year]) }}" class="btn btn-success btn-rounded shadow">
+                    <i class="fas fa-file-excel me-2"></i>Export to Excel
+                </a>
+            </div>
         </div>
     </div>
 

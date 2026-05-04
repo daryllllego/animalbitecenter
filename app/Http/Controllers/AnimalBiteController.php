@@ -382,5 +382,165 @@ class AnimalBiteController extends Controller
             'selectedBranch' => $selectedBranch
         ]);
     }
+
+    public function exportDailyReport()
+    {
+        if (!auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $branch = session('selected_branch', 'All Branches');
+        $fileName = "Daily_Report_{$branch}_{$date}.csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use ($date, $branch) {
+            $file = fopen('php://output', 'w');
+            
+            // Financial Summary Section
+            fputcsv($file, ["DAILY REPORT SUMMARY - {$branch} - {$date}"]);
+            fputcsv($file, []);
+
+            $query = MasterlistEntry::whereDate('created_at', $date);
+            $deductionsQuery = Deduction::whereDate('date', $date);
+            $dailyRecordsQuery = DailyRecord::whereDate('date', $date);
+
+            if ($branch !== 'All Branches') {
+                $query->where('branch', $branch);
+                $deductionsQuery->where('branch', $branch);
+                $dailyRecordsQuery->where('branch', $branch);
+            }
+
+            $totalSales = $query->sum('amount_paid');
+            $totalPatients = $query->count();
+            $totalDeductions = $deductionsQuery->sum('amount');
+            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
+            $totalCashSales = $totalSales - $totalOnlineSales;
+            $netSales = $totalSales - $totalDeductions;
+
+            fputcsv($file, ["Metric", "Value"]);
+            fputcsv($file, ["Total Patients", $totalPatients]);
+            fputcsv($file, ["Total Sales", "P " . number_format($totalSales, 2)]);
+            fputcsv($file, ["Total Online Sales", "P " . number_format($totalOnlineSales, 2)]);
+            fputcsv($file, ["Total Cash Sales", "P " . number_format($totalCashSales, 2)]);
+            fputcsv($file, ["Total Deductions", "P " . number_format($totalDeductions, 2)]);
+            fputcsv($file, ["Net Sales (After Deductions)", "P " . number_format($netSales, 2)]);
+            fputcsv($file, []);
+            fputcsv($file, []);
+
+            // Detailed Transactions Section
+            fputcsv($file, ["DETAILED TRANSACTIONS"]);
+            fputcsv($file, ["Patient Name", "Time", "Dose", "Amount Paid", "Payment Method", "Branch"]);
+
+            $entriesQuery = MasterlistEntry::with('patient')->whereDate('created_at', $date);
+            if ($branch !== 'All Branches') {
+                $entriesQuery->where('branch', $branch);
+            }
+            
+            foreach ($entriesQuery->get() as $entry) {
+                fputcsv($file, [
+                    $entry->patient->name ?? 'N/A',
+                    $entry->time,
+                    $entry->dose_received,
+                    $entry->amount_paid,
+                    $entry->payment_method,
+                    $entry->branch
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportMonthlyReport(Request $request)
+    {
+        if (!auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $month = $request->get('month', Carbon::now()->format('m'));
+        $year = $request->get('year', Carbon::now()->format('Y'));
+        $branch = session('selected_branch', 'All Branches');
+        $fileName = "Monthly_Report_{$branch}_{$month}_{$year}.csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use ($month, $year, $branch) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ["MONTHLY REPORT - {$branch} - Month: {$month} Year: {$year}"]);
+            fputcsv($file, []);
+
+            $query = MasterlistEntry::whereMonth('created_at', $month)->whereYear('created_at', $year);
+            $deductionsQuery = Deduction::whereMonth('date', $month)->whereYear('date', $year);
+            $dailyRecordsQuery = DailyRecord::whereMonth('date', $month)->whereYear('date', $year);
+
+            if ($branch !== 'All Branches') {
+                $query->where('branch', $branch);
+                $deductionsQuery->where('branch', $branch);
+                $dailyRecordsQuery->where('branch', $branch);
+            }
+
+            // Summary Totals
+            $totalSales = $query->sum('amount_paid');
+            $totalPatients = $query->count();
+            $totalDeductions = $deductionsQuery->sum('amount');
+            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
+            $totalCashSales = $totalSales - $totalOnlineSales;
+            $netSales = $totalSales - $totalDeductions;
+
+            fputcsv($file, ["MONTHLY SUMMARY"]);
+            fputcsv($file, ["Metric", "Value"]);
+            fputcsv($file, ["Total Patients", $totalPatients]);
+            fputcsv($file, ["Total Sales", "P " . number_format($totalSales, 2)]);
+            fputcsv($file, ["Total Online Sales", "P " . number_format($totalOnlineSales, 2)]);
+            fputcsv($file, ["Total Cash Sales", "P " . number_format($totalCashSales, 2)]);
+            fputcsv($file, ["Total Deductions", "P " . number_format($totalDeductions, 2)]);
+            fputcsv($file, ["Net Monthly Sales", "P " . number_format($netSales, 2)]);
+            fputcsv($file, []);
+            fputcsv($file, []);
+
+            if ($branch === 'All Branches') {
+                fputcsv($file, ["BRANCH BREAKDOWN"]);
+                fputcsv($file, ["Branch Name", "Total Patients", "Total Sales", "Online Sales", "Deductions", "Net Sales"]);
+
+                $salesData = $query->selectRaw('branch, SUM(amount_paid) as total_sales, COUNT(*) as total_patients')->groupBy('branch')->get()->keyBy('branch');
+                $deductionsData = $deductionsQuery->selectRaw('branch, SUM(amount) as total_deductions')->groupBy('branch')->get()->keyBy('branch');
+                $onlineSalesData = $dailyRecordsQuery->selectRaw('branch, SUM(online_sales) as total_online_sales')->groupBy('branch')->get()->keyBy('branch');
+
+                $branches = ['Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'];
+                foreach ($branches as $b) {
+                    if ($salesData->has($b) || $deductionsData->has($b)) {
+                        $s = $salesData->get($b)->total_sales ?? 0;
+                        $d = $deductionsData->get($b)->total_deductions ?? 0;
+                        fputcsv($file, [
+                            $b,
+                            $salesData->get($b)->total_patients ?? 0,
+                            $s,
+                            $onlineSalesData->get($b)->total_online_sales ?? 0,
+                            $d,
+                            $s - $d
+                        ]);
+                    }
+                }
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
 

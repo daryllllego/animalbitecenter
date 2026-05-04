@@ -58,9 +58,18 @@
 
 @section('content')
 <div class="row">
-    <div class="col-12 mb-4">
-        <h2 class="text-primary font-w600">CEBU ANIMAL BITE CLINIC - {{ auth()->user()->is_super_admin && session('selected_branch') != 'All Branches' ? strtoupper(session('selected_branch')) : (auth()->user()->is_super_admin ? 'ALL BRANCHES' : strtoupper(auth()->user()->branch)) }}</h2>
-        <p class="text-muted">Filtered Date: <span class="badge bg-primary px-3 py-2" style="font-size: 14px;">{{ \Carbon\Carbon::parse($selectedDate)->format('F d, Y') }}</span></p>
+    <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="text-primary font-w600">CEBU ANIMAL BITE CLINIC - {{ auth()->user()->is_super_admin && session('selected_branch') != 'All Branches' ? strtoupper(session('selected_branch')) : (auth()->user()->is_super_admin ? 'ALL BRANCHES' : strtoupper(auth()->user()->branch)) }}</h2>
+            <p class="text-muted">Filtered Date: <span class="badge bg-primary px-3 py-2" style="font-size: 14px;">{{ \Carbon\Carbon::parse($selectedDate)->format('F d, Y') }}</span></p>
+        </div>
+        @if(auth()->user()->is_super_admin)
+        <div>
+            <a href="{{ route('animal-bite.export-daily') }}" class="btn btn-success btn-rounded shadow">
+                <i class="fas fa-file-excel me-2"></i>Export to Excel
+            </a>
+        </div>
+        @endif
     </div>
 </div>
 
