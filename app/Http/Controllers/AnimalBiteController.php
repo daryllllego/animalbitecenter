@@ -51,7 +51,7 @@ class AnimalBiteController extends Controller
         $totalDeductions = Deduction::whereDate('date', $date)->sum('amount');
         
         // New Calculations
-        $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])->sum('amount_paid');
+        $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME'])->sum('amount_paid');
         $totalCashSales = MasterlistEntry::whereDate('created_at', $date)->where('payment_method', 'CASH')->sum('amount_paid');
         $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
 
@@ -464,7 +464,7 @@ class AnimalBiteController extends Controller
             $onlineSalesData = MasterlistEntry::query()
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME'])
                 ->selectRaw('branch, SUM(amount_paid) as total_online_sales')
                 ->groupBy('branch')
                 ->get()
@@ -502,7 +502,7 @@ class AnimalBiteController extends Controller
             $totalOnlineSales = MasterlistEntry::query()
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME'])
                 ->when($selectedBranch !== 'All Branches', function($q) use ($selectedBranch) {
                     return $q->where('branch', $selectedBranch);
                 })
@@ -577,7 +577,7 @@ class AnimalBiteController extends Controller
             $totalDeductions = $deductionsQuery->sum('amount');
             
             $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME'])
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
@@ -677,7 +677,7 @@ class AnimalBiteController extends Controller
             
             $totalOnlineSales = MasterlistEntry::whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME'])
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
