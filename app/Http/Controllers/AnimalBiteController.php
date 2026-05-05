@@ -36,17 +36,23 @@ class AnimalBiteController extends Controller
         
         $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
         
-        // Fetch Yesterday's Closing Cash
-        $yesterday = Carbon::parse($date)->subDay()->toDateString();
-        $prevClosingRecord = CashRecord::where('date', $yesterday)->where('shift', 'closing')->first();
-        $openingCash = $prevClosingRecord ? $prevClosingRecord->total_amount : 0;
+        // Fully Automated Opening Cash: Total Historical Cash Sales - Total Historical Deductions (before today)
+        $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+            ->where('payment_method', 'CASH')
+            ->sum('amount_paid');
+            
+        $historicalDeductions = Deduction::where('date', '<', $date)
+            ->sum('amount');
+            
+        $openingCash = $historicalSales - $historicalDeductions;
         
         $totalPatients = MasterlistEntry::whereDate('created_at', $date)->count();
         $totalSales = MasterlistEntry::whereDate('created_at', $date)->sum('amount_paid');
         $totalDeductions = Deduction::whereDate('date', $date)->sum('amount');
         
         // New Calculations
-        $totalCashSales = $totalSales - $dailyRecord->online_sales;
+        $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])->sum('amount_paid');
+        $totalCashSales = MasterlistEntry::whereDate('created_at', $date)->where('payment_method', 'CASH')->sum('amount_paid');
         $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
 
         return view('animalbite.dashboard', [
@@ -59,7 +65,7 @@ class AnimalBiteController extends Controller
                 'deductions' => $totalDeductions,
                 'cash_sales' => $totalCashSales,
                 'expected_cash' => $netSales,
-                'online_sales' => $dailyRecord->online_sales,
+                'online_sales' => $totalOnlineSales,
                 'opening_cash' => $openingCash
             ],
             'selectedDate' => $date
@@ -124,6 +130,64 @@ class AnimalBiteController extends Controller
         return redirect()->back()->with('success', 'Cash record saved successfully!');
     }
 
+    public function cashTracking()
+    {
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $branch = session('selected_branch', 'All Branches');
+        
+        // Fully Automated Calculation: 
+        // Opening = Total Historical Cash Sales - Total Historical Deductions (before today)
+        
+        $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+            ->where('payment_method', 'CASH')
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->sum('amount_paid');
+            
+        $historicalDeductions = Deduction::where('date', '<', $date)
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->sum('amount');
+            
+        $openingAmount = $historicalSales - $historicalDeductions;
+        
+        // Today's Totals
+        $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
+            ->where('payment_method', 'CASH')
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->sum('amount_paid');
+            
+        $totalDeductions = Deduction::whereDate('date', $date)
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->sum('amount');
+            
+        $expectedCash = ($openingAmount + $totalCashSales) - $totalDeductions;
+        
+        // For automated tracking, Closing is the same as Expected
+        $closingAmount = $expectedCash;
+        $variance = 0;
+
+        return view('animalbite.cash-tracking', [
+            'title' => 'Cash on Hand - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'date' => $date,
+            'openingAmount' => $openingAmount,
+            'totalCashSales' => $totalCashSales,
+            'totalDeductions' => $totalDeductions,
+            'expectedCash' => $expectedCash,
+            'closingAmount' => $closingAmount,
+            'variance' => $variance,
+            'selectedDate' => $date
+        ]);
+    }
+
     public function patients()
     {
         $patients = Patient::latest()->get();
@@ -176,6 +240,7 @@ class AnimalBiteController extends Controller
             'animal_status' => 'nullable|string',
             'amount_paid' => 'required|numeric',
             'payment_method' => 'required|string',
+            'reference_number' => 'nullable|string',
             'remarks' => 'nullable|string',
         ]);
 
@@ -202,6 +267,7 @@ class AnimalBiteController extends Controller
             'animal_status' => 'nullable|string',
             'amount_paid' => 'required|numeric',
             'payment_method' => 'required|string',
+            'reference_number' => 'nullable|string',
             'remarks' => 'nullable|string',
         ]);
 
@@ -239,17 +305,45 @@ class AnimalBiteController extends Controller
     public function storeDeduction(Request $request)
     {
         $validated = $request->validate([
+            'description' => 'required|string',
+            'released_by' => 'required|string',
             'amount' => 'required|numeric',
-            'description' => 'required|string|max:255',
-            'released_by' => 'required|string|max:255',
-            'released_to' => 'required|string|max:255',
+            'released_to' => 'required|string'
         ]);
 
-        $validated['date'] = session('selected_date', Carbon::today()->toDateString());
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $branch = session('selected_branch', 'All Branches');
 
-        Deduction::create($validated);
+        Deduction::create([
+            'description' => $validated['description'],
+            'released_by' => $validated['released_by'],
+            'amount' => $validated['amount'],
+            'released_to' => $validated['released_to'],
+            'date' => $date,
+            'branch' => $branch !== 'All Branches' ? $branch : 'Mandaue Branch' // Default if All Branches selected
+        ]);
 
         return redirect()->back()->with('success', 'Deduction added successfully!');
+    }
+
+    public function updateDeduction(Request $request, Deduction $deduction)
+    {
+        $validated = $request->validate([
+            'description' => 'required|string',
+            'released_by' => 'required|string',
+            'amount' => 'required|numeric',
+            'released_to' => 'required|string'
+        ]);
+
+        $deduction->update($validated);
+
+        return redirect()->back()->with('success', 'Deduction updated successfully!');
+    }
+
+    public function deleteDeduction(Deduction $deduction)
+    {
+        $deduction->delete();
+        return redirect()->back()->with('success', 'Deduction deleted successfully!');
     }
 
     public function updateDailyStats(Request $request)
@@ -367,7 +461,11 @@ class AnimalBiteController extends Controller
                 ->get()
                 ->keyBy('branch');
 
-            $onlineSalesData = $dailyRecordsQuery->selectRaw('branch, SUM(online_sales) as total_online_sales')
+            $onlineSalesData = MasterlistEntry::query()
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->selectRaw('branch, SUM(amount_paid) as total_online_sales')
                 ->groupBy('branch')
                 ->get()
                 ->keyBy('branch');
@@ -400,18 +498,27 @@ class AnimalBiteController extends Controller
             $totalSales = $query->sum('amount_paid');
             $totalPatients = $query->count();
             $totalDeductions = $deductionsQuery->sum('amount');
-            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
             
-            $results[$selectedBranch] = [
-                'sales' => $totalSales,
-                'patients' => $totalPatients,
-                'deductions' => $totalDeductions,
-                'online_sales' => $totalOnlineSales,
-            ];
+            $totalOnlineSales = MasterlistEntry::query()
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->when($selectedBranch !== 'All Branches', function($q) use ($selectedBranch) {
+                    return $q->where('branch', $selectedBranch);
+                })
+                ->sum('amount_paid');
         }
 
-        $totalCashSales = $totalSales - $totalOnlineSales;
-        $netSales = $totalSales - $totalDeductions;
+        $totalCashSales = MasterlistEntry::query()
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->where('payment_method', 'CASH')
+            ->when($selectedBranch !== 'All Branches', function($q) use ($selectedBranch) {
+                return $q->where('branch', $selectedBranch);
+            })
+            ->sum('amount_paid');
+
+        $netSales = ($totalCashSales - $totalDeductions);
 
         return view('animalbite.monthly-report', [
             'title' => 'Monthly Report - ' . Carbon::create()->month($month)->format('F') . ' ' . $year,
@@ -468,23 +575,43 @@ class AnimalBiteController extends Controller
             $totalSales = $query->sum('amount_paid');
             $totalPatients = $query->count();
             $totalDeductions = $deductionsQuery->sum('amount');
-            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
-            $totalCashSales = $totalSales - $totalOnlineSales;
-            $netSales = $totalSales - $totalDeductions;
+            
+            $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->when($branch !== 'All Branches', function($q) use ($branch) {
+                    return $q->where('branch', $branch);
+                })
+                ->sum('amount_paid');
+            
+            $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
+                ->where('payment_method', 'CASH')
+                ->when($branch !== 'All Branches', function($q) use ($branch) {
+                    return $q->where('branch', $branch);
+                })
+                ->sum('amount_paid');
+            
+            $openingRecord = CashRecord::where('date', $date)->where('shift', 'opening');
+            if ($branch !== 'All Branches') {
+                $openingRecord->where('branch', $branch);
+            }
+            $openingCash = $openingRecord->sum('total_amount');
+            
+            $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
 
             fputcsv($file, ["Metric", "Value"]);
             fputcsv($file, ["Total Patients", $totalPatients]);
             fputcsv($file, ["Total Sales", "P " . number_format($totalSales, 2)]);
             fputcsv($file, ["Total Online Sales", "P " . number_format($totalOnlineSales, 2)]);
-            fputcsv($file, ["Total Cash Sales", "P " . number_format($totalCashSales, 2)]);
+            fputcsv($file, ["Total Cash Sales (Cash Payment only)", "P " . number_format($totalCashSales, 2)]);
+            fputcsv($file, ["Opening Cash Today", "P " . number_format($openingCash, 2)]);
             fputcsv($file, ["Total Deductions", "P " . number_format($totalDeductions, 2)]);
-            fputcsv($file, ["Net Sales (After Deductions)", "P " . number_format($netSales, 2)]);
+            fputcsv($file, ["Net Sales (Cash Sales - Deductions + Opening)", "P " . number_format($netSales, 2)]);
             fputcsv($file, []);
             fputcsv($file, []);
 
             // Detailed Transactions Section
             fputcsv($file, ["DETAILED TRANSACTIONS"]);
-            fputcsv($file, ["Patient Name", "Time", "Dose", "Amount Paid", "Payment Method", "Nurse", "Branch"]);
+            fputcsv($file, ["Patient Name", "Time", "Dose", "Amount Paid", "Payment Method", "Reference Number", "Nurse", "Branch"]);
 
             $entriesQuery = MasterlistEntry::with('patient')->whereDate('created_at', $date);
             if ($branch !== 'All Branches') {
@@ -498,6 +625,7 @@ class AnimalBiteController extends Controller
                     $entry->dose_received,
                     $entry->amount_paid,
                     $entry->payment_method,
+                    $entry->reference_number ?? 'N/A',
                     $entry->nurse ?? 'N/A',
                     $entry->branch
                 ]);
@@ -546,9 +674,24 @@ class AnimalBiteController extends Controller
             $totalSales = $query->sum('amount_paid');
             $totalPatients = $query->count();
             $totalDeductions = $deductionsQuery->sum('amount');
-            $totalOnlineSales = $dailyRecordsQuery->sum('online_sales');
-            $totalCashSales = $totalSales - $totalOnlineSales;
-            $netSales = $totalSales - $totalDeductions;
+            
+            $totalOnlineSales = MasterlistEntry::whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO'])
+                ->when($branch !== 'All Branches', function($q) use ($branch) {
+                    return $q->where('branch', $branch);
+                })
+                ->sum('amount_paid');
+            
+            $totalCashSales = MasterlistEntry::whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->where('payment_method', 'CASH')
+                ->when($branch !== 'All Branches', function($q) use ($branch) {
+                    return $q->where('branch', $branch);
+                })
+                ->sum('amount_paid');
+                
+            $netSales = $totalCashSales - $totalDeductions;
 
             fputcsv($file, ["MONTHLY SUMMARY"]);
             fputcsv($file, ["Metric", "Value"]);

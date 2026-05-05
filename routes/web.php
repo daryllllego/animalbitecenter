@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export-daily', [AnimalBiteController::class, 'exportDailyReport'])->name('export-daily');
         Route::get('/export-monthly', [AnimalBiteController::class, 'exportMonthlyReport'])->name('export-monthly');
         Route::get('/cash-on-hand', [AnimalBiteController::class, 'cashOnHand'])->name('cash-on-hand');
+        Route::get('/cash-tracking', [AnimalBiteController::class, 'cashTracking'])->name('cash-tracking');
         Route::get('/patients', [AnimalBiteController::class, 'patients'])->name('patients');
         Route::post('/patients', [AnimalBiteController::class, 'storePatient'])->name('patients.store');
         Route::put('/patients/{patient}', [AnimalBiteController::class, 'updatePatient'])->name('patients.update');
@@ -41,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/masterlist/{entry}', [AnimalBiteController::class, 'updateEntry'])->name('masterlist.update');
         Route::delete('/masterlist/{entry}', [AnimalBiteController::class, 'destroyEntry'])->name('masterlist.destroy');
         Route::post('/deductions', [AnimalBiteController::class, 'storeDeduction'])->name('deductions.store');
+        Route::put('/deductions/{deduction}', [AnimalBiteController::class, 'updateDeduction'])->name('deductions.update');
+        Route::delete('/deductions/{deduction}', [AnimalBiteController::class, 'deleteDeduction'])->name('deductions.destroy');
         Route::post('/set-date', [AnimalBiteController::class, 'setDate'])->name('set-date');
         Route::post('/update-daily-stats', [AnimalBiteController::class, 'updateDailyStats'])->name('update-daily-stats');
         Route::post('/cash-on-hand', [AnimalBiteController::class, 'storeCashRecord'])->name('cash-on-hand.store');

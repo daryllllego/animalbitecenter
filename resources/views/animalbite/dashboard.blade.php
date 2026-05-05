@@ -104,7 +104,7 @@
             <div class="card-body">
                 <div class="kpi-title">TOTAL CASH SALES</div>
                 <div class="kpi-value text-warning">₱ {{ number_format($stats['cash_sales'], 2) }}</div>
-                <small class="text-muted">(Total Sales - Online Sales)</small>
+
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@
             <div class="card-body">
                 <div class="kpi-title">NET SALES</div>
                 <div class="kpi-value text-info">₱ {{ number_format($stats['expected_cash'], 2) }}</div>
-                <small class="text-muted">(Cash Sales - Deductions + Prev. Closing)</small>
+
             </div>
         </div>
     </div>
@@ -125,9 +125,6 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="kpi-title">TOTAL ONLINE SALES</div>
-                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary" data-bs-toggle="modal" data-bs-target="#editOnlineSalesModal">
-                        <i class="fa fa-pencil-alt"></i>
-                    </button>
                 </div>
                 <div class="kpi-value text-secondary">₱ {{ number_format($stats['online_sales'], 2) }}</div>
             </div>
@@ -153,9 +150,10 @@
                             <tr>
                                 <th>NAME OF ITEM</th>
                                 <th>RELEASED BY</th>
-                                <th>AMOUNT</th>
-                                <th>RELEASED TO</th>
-                            </tr>
+                                 <th>AMOUNT</th>
+                                 <th>RELEASED TO</th>
+                                 <th>ACTION</th>
+                             </tr>
                         </thead>
                         <tbody>
                             @php
@@ -166,12 +164,32 @@
                                 <td class="text-start ps-4">{{ $deduction->description }}</td>
                                 <td>{{ $deduction->released_by }}</td>
                                 <td class="font-weight-bold text-danger">₱ {{ number_format($deduction->amount, 2) }}</td>
-                                <td>{{ $deduction->released_to }}</td>
-                            </tr>
+                                 <td>{{ $deduction->released_to }}</td>
+                                 <td>
+                                     <div class="d-flex">
+                                         <button type="button" class="btn btn-primary shadow btn-xs sharp me-1 editDeductionBtn" 
+                                             data-id="{{ $deduction->id }}"
+                                             data-description="{{ $deduction->description }}"
+                                             data-released_by="{{ $deduction->released_by }}"
+                                             data-amount="{{ $deduction->amount }}"
+                                             data-released_to="{{ $deduction->released_to }}"
+                                             data-bs-toggle="modal" data-bs-target="#editDeductionModal">
+                                             <i class="fa fa-pencil"></i>
+                                         </button>
+                                         <form action="{{ route('animal-bite.deductions.destroy', $deduction->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this deduction?')">
+                                             @csrf
+                                             @method('DELETE')
+                                             <button type="submit" class="btn btn-danger shadow btn-xs sharp">
+                                                 <i class="fa fa-trash"></i>
+                                             </button>
+                                         </form>
+                                     </div>
+                                 </td>
+                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="text-muted">No deductions recorded for this date.</td>
-                            </tr>
+                                 <td colspan="5" class="text-muted text-center py-4">No deductions recorded for this date.</td>
+                             </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -198,7 +216,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="released_by" class="form-label font-weight-bold">Released By</label>
-                        <input type="text" class="form-control" id="released_by" name="released_by" required placeholder="e.g. Nurse Jane">
+                        <input type="text" class="form-control" id="released_by" name="released_by" required value="{{ auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
                     </div>
                     <div class="mb-3">
                         <label for="amount" class="form-label font-weight-bold">Amount</label>
@@ -220,36 +238,68 @@
         </div>
     </div>
 </div>
-<!-- Edit Online Sales Modal -->
-<div class="modal fade" id="editOnlineSalesModal" tabindex="-1" aria-labelledby="editOnlineSalesModalLabel" aria-hidden="true">
+
+<!-- Edit Deduction Modal -->
+<div class="modal fade" id="editDeductionModal" tabindex="-1" aria-labelledby="editDeductionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-            <div class="modal-header bg-secondary text-white" style="border-radius: 15px 15px 0 0;">
-                <h5 class="modal-title text-white" id="editOnlineSalesModalLabel">
-                    <i class="fa fa-edit me-2"></i>Edit Online Sales
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white" id="editDeductionModalLabel">Edit Deduction</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('animal-bite.update-daily-stats') }}" method="POST">
+            <form id="editDeductionForm" method="POST">
                 @csrf
-                <div class="modal-body p-4">
+                @method('PUT')
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label for="online_sales" class="form-label font-weight-bold text-dark">Total Online Sales Amount</label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-secondary text-white border-secondary">₱</span>
-                            <input type="number" step="0.01" class="form-control border-secondary font-weight-bold" id="online_sales" name="online_sales" value="{{ $stats['online_sales'] }}" required autofocus>
+                        <label for="edit_description" class="form-label font-weight-bold">Name of Item</label>
+                        <input type="text" class="form-control" id="edit_description" name="description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_released_by" class="form-label font-weight-bold">Released By</label>
+                        <input type="text" class="form-control" id="edit_released_by" name="released_by" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_amount" class="form-label font-weight-bold">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-primary text-white border-primary">₱</span>
+                            <input type="number" step="0.01" class="form-control border-primary" id="edit_amount" name="amount" required>
                         </div>
-                        <small class="text-muted mt-2 d-block">This amount will be subtracted from Total Sales to calculate Total Cash Sales.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_released_to" class="form-label font-weight-bold">Released To</label>
+                        <input type="text" class="form-control" id="edit_released_to" name="released_to" required>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pb-4">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <button type="submit" class="btn btn-secondary px-4 text-white" style="border-radius: 8px;">
-                        <i class="fa fa-check me-2"></i>Update Amount
-                    </button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Update Deduction</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.editDeductionBtn').on('click', function() {
+            const id = $(this).data('id');
+            const description = $(this).data('description');
+            const released_by = $(this).data('released_by');
+            const amount = $(this).data('amount');
+            const released_to = $(this).data('released_to');
+
+            const form = $('#editDeductionForm');
+            form.attr('action', `/animal-bite/deductions/${id}`);
+            
+            $('#edit_description').val(description);
+            $('#edit_released_by').val(released_by);
+            $('#edit_amount').val(amount);
+            $('#edit_released_to').val(released_to);
+        });
+    });
+</script>
+@endpush
+
 @endsection

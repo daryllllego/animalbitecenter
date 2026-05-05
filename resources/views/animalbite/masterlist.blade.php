@@ -82,6 +82,7 @@
                                 <th>STATUS OF ANIMAL</th>
                                 <th>AMOUNT PAID</th>
                                 <th>PAYMENT METHOD</th>
+                                <th>REFERENCE NUMBER</th>
                                 <th>REMARKS</th>
                                 <th>NURSE</th>
                                 <th>ACTION</th>
@@ -105,6 +106,7 @@
                                 </td>
                                 <td>₱ {{ number_format($entry->amount_paid, 2) }}</td>
                                 <td>{{ $entry->payment_method }}</td>
+                                <td class="font-weight-bold text-success">{{ $entry->reference_number ?? 'N/A' }}</td>
                                 <td class="text-start">{{ $entry->remarks }}</td>
                                 <td class="font-weight-bold text-primary">{{ $entry->nurse ?? 'N/A' }}</td>
                                 <td>
@@ -118,6 +120,7 @@
                                             data-animal-status="{{ $entry->animal_status }}"
                                             data-amount="{{ $entry->amount_paid }}"
                                             data-payment="{{ $entry->payment_method }}"
+                                            data-reference="{{ $entry->reference_number }}"
                                             data-remarks="{{ $entry->remarks }}">
                                         <i class="fa fa-edit"></i>
                                     </button>
@@ -186,12 +189,18 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="payment_method" class="form-label">Payment Method</label>
-                            <select class="form-control" id="payment_method" name="payment_method" required>
+                            <select class="form-control payment-method-select" id="payment_method" name="payment_method" required>
                                 <option value="CASH">CASH</option>
                                 <option value="GCASH">GCASH</option>
                                 <option value="BPI">BPI</option>
                                 <option value="BDO">BDO</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="row reference-number-row" style="display: none;">
+                        <div class="col-12 mb-3">
+                            <label for="reference_number" class="form-label">Reference Number</label>
+                            <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="Enter Gcash/BPI/BDO reference number">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -254,12 +263,18 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_payment_method" class="form-label">Payment Method</label>
-                            <select class="form-control" id="edit_payment_method" name="payment_method" required>
+                            <select class="form-control payment-method-select" id="edit_payment_method" name="payment_method" required>
                                 <option value="CASH">CASH</option>
                                 <option value="GCASH">GCASH</option>
                                 <option value="BPI">BPI</option>
                                 <option value="BDO">BDO</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="row reference-number-row" style="display: none;">
+                        <div class="col-12 mb-3">
+                            <label for="edit_reference_number" class="form-label">Reference Number</label>
+                            <input type="text" class="form-control" id="edit_reference_number" name="reference_number" placeholder="Enter Gcash/BPI/BDO reference number">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -317,6 +332,7 @@
             const animalStatus = $(this).data('animal-status');
             const amount = $(this).data('amount');
             const payment = $(this).data('payment');
+            const reference = $(this).data('reference');
             const remarks = $(this).data('remarks');
 
             $('#edit_patient_id').val(patientId).trigger('change');
@@ -325,9 +341,27 @@
             $('#edit_animal_status').val(animalStatus);
             $('#edit_amount_paid').val(amount);
             $('#edit_payment_method').val(payment);
+            $('#edit_reference_number').val(reference);
+            
+            // Trigger payment method change to show/hide reference number
+            $('#edit_payment_method').trigger('change');
+            
             $('#edit_remarks').val(remarks);
             
             $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
+        });
+
+        // Toggle Reference Number field visibility
+        $('.payment-method-select').on('change', function() {
+            const method = $(this).val();
+            const row = $(this).closest('.modal-content').find('.reference-number-row');
+            if (['GCASH', 'BPI', 'BDO'].includes(method)) {
+                row.show();
+                row.find('input').attr('required', true);
+            } else {
+                row.hide();
+                row.find('input').attr('required', false).val('');
+            }
         });
     });
 </script>

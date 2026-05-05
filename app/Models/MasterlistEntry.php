@@ -19,6 +19,7 @@ class MasterlistEntry extends Model
         'animal_status',
         'amount_paid',
         'payment_method',
+        'reference_number',
         'remarks',
         'nurse',
     ];

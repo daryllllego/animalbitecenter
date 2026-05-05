@@ -49,17 +49,34 @@
             </a>
         </li>
 
-        <li class="{{ request()->routeIs('animal-bite.cash-on-hand') ? 'active' : '' }}">
-            <a href="{{ route('animal-bite.cash-on-hand') }}" class="modern-nav-link">
+        <li class="{{ request()->routeIs('animal-bite.cash-tracking') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.cash-tracking') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
+                    <!-- Peso Sign SVG -->
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <path d="M7 21V5h7a5 5 0 0 1 0 10H7"></path>
+                        <line x1="5" y1="8" x2="17" y2="8"></line>
+                        <line x1="5" y1="12" x2="17" y2="12"></line>
                     </svg>
                 </div>
                 <span class="modern-nav-text">Cash on Hand</span>
             </a>
         </li>
+
+        {{-- Hidden for now as per user request --}}
+        {{-- 
+        <li class="{{ request()->routeIs('animal-bite.cash-on-hand') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.cash-on-hand') }}" class="modern-nav-link">
+                <div class="modern-nav-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <span class="modern-nav-text">Cash Denominations</span>
+            </a>
+        </li>
+        --}}
 
         <li class="{{ request()->routeIs('animal-bite.masterlist') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.masterlist') }}" class="modern-nav-link">
