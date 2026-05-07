@@ -816,8 +816,8 @@ class AnimalBiteController extends Controller
             abort(403);
         }
 
-        if ($approvalRequest->model_type === 'App\Models\MasterlistEntry') {
-            $entry = \App\Models\MasterlistEntry::find($approvalRequest->model_id);
+        if ($approvalRequest->model_type === MasterlistEntry::class) {
+            $entry = \App\Models\MasterlistEntry::withoutGlobalScopes()->find($approvalRequest->model_id);
             if ($entry) {
                 if ($approvalRequest->action === 'edit') {
                     $entry->update($approvalRequest->new_data);

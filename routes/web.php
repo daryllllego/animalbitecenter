@@ -54,6 +54,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/approval-queue', [AnimalBiteController::class, 'approvalQueue'])->name('approval-queue');
         Route::post('/approval-queue/{approvalRequest}/approve', [AnimalBiteController::class, 'approveRequest'])->name('approval-queue.approve');
         Route::post('/approval-queue/{approvalRequest}/reject', [AnimalBiteController::class, 'rejectRequest'])->name('approval-queue.reject');
-    });
 
+        // User Management Routes (Super Admin Only)
+        Route::middleware(['super.admin'])->group(function () {
+            Route::get('/users', [App\Http\Controllers\UserManagementController::class, 'index'])->name('users.index');
+            Route::post('/users', [App\Http\Controllers\UserManagementController::class, 'store'])->name('users.store');
+            Route::put('/users/{user}', [App\Http\Controllers\UserManagementController::class, 'update'])->name('users.update');
+            Route::delete('/users/{user}', [App\Http\Controllers\UserManagementController::class, 'destroy'])->name('users.destroy');
+        });
+    });
 });
