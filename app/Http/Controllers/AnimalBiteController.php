@@ -10,6 +10,7 @@ use App\Models\DailyRecord;
 use App\Models\CashRecord;
 use App\Models\Inventory;
 use App\Models\InventoryEntry;
+use App\Models\ApprovalRequest;
 use Carbon\Carbon;
 
 class AnimalBiteController extends Controller
@@ -221,13 +222,30 @@ class AnimalBiteController extends Controller
         $entries = MasterlistEntry::with('patient')->whereDate('created_at', $date)->latest()->get();
         $patients = Patient::orderBy('name')->get();
 
+        // Get IDs of entries with pending/approved requests for highlighting
+        $entryIds = $entries->pluck('id')->toArray();
+        $pendingRequests = ApprovalRequest::whereIn('model_id', $entryIds)
+            ->where('model_type', MasterlistEntry::class)
+            ->where('status', 'pending')
+            ->pluck('model_id')
+            ->toArray();
+            
+        $approvedRequests = ApprovalRequest::whereIn('model_id', $entryIds)
+            ->where('model_type', MasterlistEntry::class)
+            ->where('status', 'approved')
+            ->where('updated_at', '>=', Carbon::now()->subHours(24))
+            ->pluck('model_id')
+            ->toArray();
+
         return view('animalbite.masterlist', [
             'title' => 'Masterlist - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
             'sidebar' => 'animal-bite',
             'entries' => $entries,
             'patients' => $patients,
-            'selectedDate' => $date
+            'selectedDate' => $date,
+            'pendingRequests' => $pendingRequests,
+            'approvedRequests' => $approvedRequests,
         ]);
     }
 
@@ -252,6 +270,7 @@ class AnimalBiteController extends Controller
         
         // Record the nurse who inputted the entry
         $validated['nurse'] = auth()->user()->first_name . ' ' . auth()->user()->last_name;
+        $validated['branch'] = auth()->user()->branch;
 
         MasterlistEntry::create($validated);
 
@@ -260,7 +279,7 @@ class AnimalBiteController extends Controller
 
     public function updateEntry(Request $request, MasterlistEntry $entry)
     {
-        $validated = $request->validate([
+        $rules = [
             'patient_id' => 'required|exists:patients,id',
             'time' => 'required',
             'dose_received' => 'required|string',
@@ -269,14 +288,54 @@ class AnimalBiteController extends Controller
             'payment_method' => 'required|string',
             'reference_number' => 'nullable|string',
             'remarks' => 'nullable|string',
-        ]);
+        ];
+
+        if (auth()->user()->position !== 'Super Admin') {
+            $rules['reason'] = 'required|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        if (auth()->user()->position !== 'Super Admin') {
+            ApprovalRequest::create([
+                'model_type' => MasterlistEntry::class,
+                'model_id' => $entry->id,
+                'action' => 'edit',
+                'user_id' => auth()->id(),
+                'nurse_name' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
+                'branch' => auth()->user()->branch,
+                'reason' => $request->reason,
+                'old_data' => $entry->load('patient')->toArray(),
+                'new_data' => $validated,
+                'status' => 'pending',
+            ]);
+            return redirect()->back()->with('info', 'Your edit request has been sent for approval.');
+        }
 
         $entry->update($validated);
         return redirect()->back()->with('success', 'Masterlist entry updated successfully!');
     }
 
-    public function destroyEntry(MasterlistEntry $entry)
+    public function destroyEntry(Request $request, MasterlistEntry $entry)
     {
+        if (auth()->user()->position !== 'Super Admin') {
+            $request->validate(['reason' => 'required|string']);
+            
+            ApprovalRequest::create([
+                'model_type' => MasterlistEntry::class,
+                'model_id' => $entry->id,
+                'action' => 'delete',
+                'user_id' => auth()->id(),
+                'nurse_name' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
+                'branch' => auth()->user()->branch,
+                'reason' => $request->reason,
+                'old_data' => $entry->load('patient')->toArray(),
+                'new_data' => null,
+                'status' => 'pending',
+            ]);
+            return redirect()->back()->with('info', 'Your delete request has been sent for approval.');
+        }
+
         $entry->delete();
         return redirect()->back()->with('success', 'Masterlist entry deleted successfully!');
     }
@@ -374,7 +433,7 @@ class AnimalBiteController extends Controller
                 // Pre-fill opening with previous closing entries
                 $opening = new Inventory(['date' => $date, 'shift' => 'opening']);
                 $opening->exists = false;
-                $opening->setRelation('entries', $prevClosing->entries->map(function($entry) {
+                $opening->setRelation('entries', $prevClosing->entries->map(function(InventoryEntry $entry) {
                     return new InventoryEntry([
                         'vaccine_name' => $entry->vaccine_name,
                         'quantity' => $entry->quantity,
@@ -732,6 +791,54 @@ class AnimalBiteController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+    public function approvalQueue()
+    {
+        if (auth()->user()->position !== 'Super Admin') {
+            abort(403);
+        }
+
+        $pending = ApprovalRequest::where('status', 'pending')->latest()->get();
+        $history = ApprovalRequest::where('status', '!=', 'pending')->latest()->limit(50)->get();
+
+        return view('animalbite.approval-queue', [
+            'title' => 'Approval Queue - Animal Bite Center',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'pending' => $pending,
+            'history' => $history,
+        ]);
+    }
+
+    public function approveRequest(ApprovalRequest $approvalRequest)
+    {
+        if (auth()->user()->position !== 'Super Admin') {
+            abort(403);
+        }
+
+        if ($approvalRequest->model_type === 'App\Models\MasterlistEntry') {
+            $entry = \App\Models\MasterlistEntry::find($approvalRequest->model_id);
+            if ($entry) {
+                if ($approvalRequest->action === 'edit') {
+                    $entry->update($approvalRequest->new_data);
+                } else if ($approvalRequest->action === 'delete') {
+                    $entry->delete();
+                }
+            }
+        }
+
+        $approvalRequest->update(['status' => 'approved']);
+        return redirect()->back()->with('success', 'Request approved and applied.');
+    }
+
+    public function rejectRequest(ApprovalRequest $approvalRequest)
+    {
+        if (auth()->user()->position !== 'Super Admin') {
+            abort(403);
+        }
+
+        $approvalRequest->update(['status' => 'rejected']);
+        return redirect()->back()->with('warning', 'Request rejected.');
     }
 }
 

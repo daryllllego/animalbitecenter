@@ -41,6 +41,26 @@
             box-shadow: 0 4px 12px rgba(41, 83, 232, 0.3);
         }
 
+        .row-pending td {
+            background: #fff9c4 !important; /* Solid Yellow */
+            color: #5d4037 !important;
+            border-top: 1px solid #fbc02d !important;
+            border-bottom: 1px solid #fbc02d !important;
+        }
+        .row-pending td:first-child {
+            border-left: 10px solid #fbc02d !important;
+        }
+        
+        .row-approved td {
+            background: #e8f5e9 !important; /* Solid Green */
+            color: #1b5e20 !important;
+            border-top: 1px solid #4caf50 !important;
+            border-bottom: 1px solid #4caf50 !important;
+        }
+        .row-approved td:first-child {
+            border-left: 10px solid #4caf50 !important;
+        }
+
         .badge-status-alive {
             background-color: #059669;
             color: white;
@@ -94,14 +114,12 @@
                                     <th>REFERENCE NUMBER</th>
                                     <th>REMARKS</th>
                                     <th>NURSE</th>
-                                    @if(auth()->user()->position === 'Super Admin')
                                     <th>ACTION</th>
-                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($entries as $entry)
-                                    <tr>
+                                    <tr class="{{ in_array($entry->id, $pendingRequests) ? 'row-pending' : (in_array($entry->id, $approvedRequests) ? 'row-approved' : '') }}">
                                         <td>{{ \Carbon\Carbon::parse($entry->time)->format('h:i A') }}</td>
                                         <td class="text-start font-weight-bold">{{ $entry->patient->name }}</td>
                                         <td>{{ $entry->patient->age }}</td>
@@ -120,7 +138,6 @@
                                         <td class="font-weight-bold text-success">{{ $entry->reference_number ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $entry->remarks }}</td>
                                         <td class="font-weight-bold text-primary">{{ $entry->nurse ?? 'N/A' }}</td>
-                                        @if(auth()->user()->position === 'Super Admin')
                                         <td>
                                             <button class="btn btn-primary btn-sm rounded-circle edit-entry"
                                                 data-bs-toggle="modal" data-bs-target="#editEntryModal"
@@ -134,17 +151,25 @@
                                                 data-remarks="{{ $entry->remarks }}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
-                                            <form action="{{ route('animal-bite.masterlist.destroy', $entry->id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm rounded-circle"
-                                                    onclick="return confirm('Delete this entry?')">
+                                            
+                                            @if(auth()->user()->position === 'Super Admin')
+                                                <form action="{{ route('animal-bite.masterlist.destroy', $entry->id) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm rounded-circle"
+                                                        onclick="return confirm('Delete this entry?')">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button type="button" class="btn btn-danger btn-sm rounded-circle request-delete"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteRequestModal"
+                                                    data-id="{{ $entry->id }}">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
-                                            </form>
+                                            @endif
                                         </td>
-                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -310,10 +335,43 @@
                             <label for="edit_remarks" class="form-label">Remarks</label>
                             <textarea class="form-control" id="edit_remarks" name="remarks" rows="2"></textarea>
                         </div>
+
+                        @if(auth()->user()->position !== 'Super Admin')
+                        <div class="mb-3">
+                            <label for="edit_reason" class="form-label text-danger font-weight-bold">Reason for Edit (Required for Approval)</label>
+                            <textarea class="form-control border-danger" id="edit_reason" name="reason" rows="2" required placeholder="Explain why you are editing this entry..."></textarea>
+                        </div>
+                        @endif
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Request Modal (Staff) -->
+    <div class="modal fade" id="deleteRequestModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-white">Request Deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="deleteRequestForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-body">
+                        <p class="text-dark">You are about to request the deletion of this entry. This action requires approval from a Super Admin.</p>
+                        <div class="mb-3">
+                            <label for="delete_reason" class="form-label font-weight-bold">Reason for Deletion</label>
+                            <textarea class="form-control border-danger" id="delete_reason" name="reason" rows="3" required placeholder="Explain why this entry should be deleted..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Submit Deletion Request</button>
                     </div>
                 </form>
             </div>
@@ -378,6 +436,12 @@
                 $('#edit_remarks').val(remarks);
 
                 $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
+            });
+
+            // Handle Request Delete Modal
+            $('.request-delete').on('click', function() {
+                const id = $(this).data('id');
+                $('#deleteRequestForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
             // Toggle Reference Number field visibility

@@ -49,6 +49,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/cash-on-hand', [AnimalBiteController::class, 'storeCashRecord'])->name('cash-on-hand.store');
         Route::post('/inventory', [AnimalBiteController::class, 'storeInventory'])->name('inventory.store');
         Route::get('/inventory', [AnimalBiteController::class, 'inventory'])->name('inventory');
+        
+        // Approval Queue Routes
+        Route::get('/approval-queue', [AnimalBiteController::class, 'approvalQueue'])->name('approval-queue');
+        Route::post('/approval-queue/{approvalRequest}/approve', [AnimalBiteController::class, 'approveRequest'])->name('approval-queue.approve');
+        Route::post('/approval-queue/{approvalRequest}/reject', [AnimalBiteController::class, 'rejectRequest'])->name('approval-queue.reject');
     });
 
 });

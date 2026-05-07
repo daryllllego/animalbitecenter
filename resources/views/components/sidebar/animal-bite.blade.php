@@ -92,6 +92,19 @@
                 <span class="modern-nav-text">Masterlist</span>
             </a>
         </li>
+        @if(auth()->user()->position === 'Super Admin')
+        <li class="{{ request()->routeIs('animal-bite.approval-queue') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.approval-queue') }}" class="modern-nav-link">
+                <div class="modern-nav-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <span class="modern-nav-text">Approval Queue</span>
+            </a>
+        </li>
+        @endif
         <li class="{{ request()->routeIs('animal-bite.inventory') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.inventory') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
