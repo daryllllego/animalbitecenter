@@ -22,6 +22,10 @@ class MasterlistEntry extends Model
         'reference_number',
         'remarks',
         'nurse',
+        'is_discounted',
+        'discount_type',
+        'discount_percentage',
+        'original_amount',
     ];
 
     public function patient()

@@ -260,7 +260,13 @@ class AnimalBiteController extends Controller
             'payment_method' => 'required|string',
             'reference_number' => 'nullable|string',
             'remarks' => 'nullable|string',
+            'is_discounted' => 'nullable|boolean',
+            'discount_type' => 'nullable|string',
+            'discount_percentage' => 'nullable|numeric',
+            'original_amount' => 'nullable|numeric',
         ]);
+
+        $validated['is_discounted'] = $request->has('is_discounted');
 
         // Use the session date for the entry creation if it's the current date,
         // but typically entries are for "Today".
@@ -288,6 +294,10 @@ class AnimalBiteController extends Controller
             'payment_method' => 'required|string',
             'reference_number' => 'nullable|string',
             'remarks' => 'nullable|string',
+            'is_discounted' => 'nullable|boolean',
+            'discount_type' => 'nullable|string',
+            'discount_percentage' => 'nullable|numeric',
+            'original_amount' => 'nullable|numeric',
         ];
 
         if (auth()->user()->position !== 'Super Admin') {
@@ -295,6 +305,7 @@ class AnimalBiteController extends Controller
         }
 
         $validated = $request->validate($rules);
+        $validated['is_discounted'] = $request->has('is_discounted');
 
         if (auth()->user()->position !== 'Super Admin') {
             ApprovalRequest::create([

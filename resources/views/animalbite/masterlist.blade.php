@@ -148,7 +148,11 @@
                                                 data-amount="{{ $entry->amount_paid }}"
                                                 data-payment="{{ $entry->payment_method }}"
                                                 data-reference="{{ $entry->reference_number }}"
-                                                data-remarks="{{ $entry->remarks }}">
+                                                data-remarks="{{ $entry->remarks }}"
+                                                data-is-discounted="{{ $entry->is_discounted }}"
+                                                data-discount-type="{{ $entry->discount_type }}"
+                                                data-discount-percentage="{{ $entry->discount_percentage }}"
+                                                data-original-amount="{{ $entry->original_amount }}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
                                             
@@ -243,6 +247,38 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input discount-toggle" type="checkbox" id="is_discounted" name="is_discounted" value="1">
+                                    <label class="form-check-label font-weight-bold" for="is_discounted">Apply Discount</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="discount-fields-container" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="discount_type" class="form-label">Discount For</label>
+                                    <select class="form-control" id="discount_type" name="discount_type">
+                                        <option value="Senior Citizen">Senior Citizen</option>
+                                        <option value="PWD">PWD</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
+                                    <input type="number" step="0.01" class="form-control discount-percentage" id="discount_percentage" name="discount_percentage" value="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="discounted_price" class="form-label">Discounted Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control discounted-price" id="discounted_price" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="original_amount" id="original_amount">
+                        </div>
                         <div class="row reference-number-row" style="display: none;">
                             <div class="col-12 mb-3">
                                 <label for="reference_number" class="form-label">Reference Number</label>
@@ -323,6 +359,38 @@
                                     <option value="BDO">BDO</option>
                                 </select>
                             </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input discount-toggle" type="checkbox" id="edit_is_discounted" name="is_discounted" value="1">
+                                    <label class="form-check-label font-weight-bold" for="edit_is_discounted">Apply Discount</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="discount-fields-container" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_discount_type" class="form-label">Discount For</label>
+                                    <select class="form-control" id="edit_discount_type" name="discount_type">
+                                        <option value="Senior Citizen">Senior Citizen</option>
+                                        <option value="PWD">PWD</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_discount_percentage" class="form-label">Discount Percentage (%)</label>
+                                    <input type="number" step="0.01" class="form-control discount-percentage" id="edit_discount_percentage" name="discount_percentage" value="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_discounted_price" class="form-label">Discounted Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control discounted-price" id="edit_discounted_price" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="original_amount" id="edit_original_amount">
+                        </div>
                         </div>
                         <div class="row reference-number-row" style="display: none;">
                             <div class="col-12 mb-3">
@@ -411,6 +479,77 @@
                 });
             });
 
+            // Discount Logic
+            function calculateDiscount(modal) {
+                const amountInput = modal.find('input[name="amount_paid"]');
+                const isDiscounted = modal.find('.discount-toggle').is(':checked');
+                const percentage = parseFloat(modal.find('.discount-percentage').val()) || 0;
+                const originalAmountInput = modal.find('input[name="original_amount"]');
+                const discountedPriceInput = modal.find('.discounted-price');
+
+                if (isDiscounted) {
+                    let baseAmount = parseFloat(originalAmountInput.val()) || parseFloat(amountInput.val()) || 0;
+                    
+                    if (!originalAmountInput.val()) {
+                        originalAmountInput.val(amountInput.val());
+                        baseAmount = parseFloat(amountInput.val()) || 0;
+                    }
+
+                    const discountedPrice = baseAmount * (1 - (percentage / 100));
+                    discountedPriceInput.val(discountedPrice.toFixed(2));
+                } else {
+                    if (originalAmountInput.val()) {
+                        amountInput.val(originalAmountInput.val());
+                        originalAmountInput.val('');
+                    }
+                    discountedPriceInput.val('');
+                }
+            }
+
+            $('.discount-toggle').on('change', function () {
+                const modal = $(this).closest('.modal-content');
+                const amountInput = modal.find('input[name="amount_paid"]');
+                const container = modal.find('.discount-fields-container');
+
+                if ($(this).is(':checked')) {
+                    if (!amountInput.val()) {
+                        alert('Please enter an amount paid before applying a discount.');
+                        $(this).prop('checked', false);
+                        return;
+                    }
+                    container.slideDown();
+                } else {
+                    container.slideUp();
+                }
+                calculateDiscount(modal);
+            });
+
+            $('.discount-percentage').on('input', function () {
+                const modal = $(this).closest('.modal-content');
+                calculateDiscount(modal);
+            });
+
+            $('input[name="amount_paid"]').on('input', function() {
+                const modal = $(this).closest('.modal-content');
+                const isDiscounted = modal.find('.discount-toggle').is(':checked');
+                if (isDiscounted) {
+                    modal.find('input[name="original_amount"]').val($(this).val());
+                    const percentage = parseFloat(modal.find('.discount-percentage').val()) || 0;
+                    const baseAmount = parseFloat($(this).val()) || 0;
+                    const discountedPrice = baseAmount * (1 - (percentage / 100));
+                    modal.find('.discounted-price').val(discountedPrice.toFixed(2));
+                }
+            });
+
+            $('form').on('submit', function() {
+                const modal = $(this).closest('.modal-content');
+                const isDiscounted = modal.find('.discount-toggle').is(':checked');
+                if (isDiscounted) {
+                    const discountedPrice = modal.find('.discounted-price').val();
+                    modal.find('input[name="amount_paid"]').val(discountedPrice);
+                }
+            });
+
             $('.edit-entry').on('click', function () {
                 const id = $(this).data('id');
                 const patientId = $(this).data('patient-id');
@@ -421,6 +560,10 @@
                 const payment = $(this).data('payment');
                 const reference = $(this).data('reference');
                 const remarks = $(this).data('remarks');
+                const isDiscounted = $(this).data('is-discounted');
+                const discountType = $(this).data('discount-type');
+                const discountPercentage = $(this).data('discount-percentage');
+                const originalAmount = $(this).data('original-amount');
 
                 $('#edit_patient_id').val(patientId).trigger('change');
                 $('#edit_time').val(time);
@@ -429,22 +572,33 @@
                 $('#edit_amount_paid').val(amount);
                 $('#edit_payment_method').val(payment);
                 $('#edit_reference_number').val(reference);
-
-                // Trigger payment method change to show/hide reference number
-                $('#edit_payment_method').trigger('change');
-
                 $('#edit_remarks').val(remarks);
 
+                if (isDiscounted) {
+                    $('#edit_is_discounted').prop('checked', true);
+                    $('#edit_discount_type').val(discountType);
+                    $('#edit_discount_percentage').val(discountPercentage);
+                    $('#edit_original_amount').val(originalAmount);
+                    $('#editEntryModal .discount-fields-container').show();
+                    $('#edit_amount_paid').val(originalAmount);
+                    const discountedPrice = originalAmount * (1 - (discountPercentage / 100));
+                    $('#edit_discounted_price').val(discountedPrice.toFixed(2));
+                } else {
+                    $('#edit_is_discounted').prop('checked', false);
+                    $('#edit_original_amount').val('');
+                    $('#editEntryModal .discount-fields-container').hide();
+                    $('#edit_discounted_price').val('');
+                }
+
+                $('#edit_payment_method').trigger('change');
                 $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
-            // Handle Request Delete Modal
             $('.request-delete').on('click', function() {
                 const id = $(this).data('id');
                 $('#deleteRequestForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
-            // Toggle Reference Number field visibility
             $('.payment-method-select').on('change', function () {
                 const method = $(this).val();
                 const row = $(this).closest('.modal-content').find('.reference-number-row');
