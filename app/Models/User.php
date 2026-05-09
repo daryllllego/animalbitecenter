@@ -32,6 +32,7 @@ class User extends Authenticatable
         'branch',
         'status',
         'is_super_admin',
+        'is_branch_account',
     ];
 
     /**
@@ -85,5 +86,32 @@ class User extends Authenticatable
         }
 
         return parent::delete();
+    }
+    /**
+     * Get the display name (Active Nurse or Branch Account Name).
+     */
+    public function getDisplayNameAttribute()
+    {
+        if (session()->has('active_nurse_id')) {
+            $nurse = User::find(session('active_nurse_id'));
+            if ($nurse) {
+                return $nurse->name;
+            }
+        }
+        return $this->name;
+    }
+
+    /**
+     * Get the display position (Active Nurse Position or Branch Account Position).
+     */
+    public function getDisplayPositionAttribute()
+    {
+        if (session()->has('active_nurse_id')) {
+            $nurse = User::find(session('active_nurse_id'));
+            if ($nurse) {
+                return $nurse->position;
+            }
+        }
+        return $this->position;
     }
 }

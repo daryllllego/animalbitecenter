@@ -33,10 +33,20 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // Allow only Super Admins and Branch Accounts to login directly to the main login page
+            if (!$user->is_super_admin && !$user->is_branch_account) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Direct login is disabled for staff accounts. Please use the "Nurse on Duty" feature through your branch account.',
+                ]);
+            }
+
             $request->session()->regenerate();
             
             // Set default branch for super admin if not set
-            if (Auth::user()->is_super_admin && !session('selected_branch')) {
+            if ($user->is_super_admin && !session('selected_branch')) {
                 session(['selected_branch' => 'All Branches']);
             }
             

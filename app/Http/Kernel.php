@@ -64,5 +64,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'division.access' => \App\Http\Middleware\CheckDivisionAccess::class,
         'super.admin' => \App\Http\Middleware\CheckSuperAdmin::class,
+        'nurse.on.duty' => \App\Http\Middleware\EnsureNurseOnDuty::class,
     ];
 }

@@ -12,10 +12,18 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         
+        // If a nurse is active, show the nurse's profile info instead
+        if (session()->has('active_nurse_id')) {
+            $nurse = User::find(session('active_nurse_id'));
+            if ($nurse) {
+                $user = $nurse;
+            }
+        }
+        
         return view('profile.index', [
             'user' => $user,
             'title' => 'Change Password',
-            'sidebar' => 'animal-bite', // Use animal-bite sidebar
+            'sidebar' => 'animal-bite',
             'role' => $user->position
         ]);
     }
@@ -28,6 +36,14 @@ class ProfileController extends Controller
         ]);
 
         $user = auth()->user();
+        
+        // If a nurse is active, update the nurse's password instead
+        if (session()->has('active_nurse_id')) {
+            $nurse = User::find(session('active_nurse_id'));
+            if ($nurse) {
+                $user = $nurse;
+            }
+        }
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->with('error', 'Current password does not match.');
@@ -35,7 +51,7 @@ class ProfileController extends Controller
 
         $user->update([
             'password' => Hash::make($request->new_password),
-            'plain_password' => $request->new_password // Keeping for compatibility as per previous structure
+            'plain_password' => $request->new_password
         ]);
 
         return redirect()->route('profile')->with('success', 'Password updated successfully!');

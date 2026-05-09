@@ -1,4 +1,4 @@
-@props(['title' => 'Page Title', 'role' => auth()->user()->position ?? 'User Role'])
+@props(['title' => 'Page Title', 'role' => auth()->user()->display_position ?? 'User Role'])
 
 <div class="header">
 	<div class="header-content">
@@ -41,6 +41,33 @@
                                     @endforeach
                                 </select>
                                 <i class="fa fa-chevron-down" style="position: absolute; right: 12px; color: #2953e8; pointer-events: none;"></i>
+                            </div>
+                        </div>
+                        @endif
+                        @if(auth()->user()->is_branch_account)
+                        <div class="date-filter-wrapper ms-4">
+                            <label class="date-filter-label">NURSE ON DUTY</label>
+                            <div class="date-input-container">
+                                <i class="fa fa-user-md calendar-icon"></i>
+                                @if(session()->has('active_nurse_id'))
+                                    <div class="d-flex align-items-center modern-date-input" style="padding-right: 15px; min-width: 200px;">
+                                        <span class="me-2 text-primary font-w600">{{ auth()->user()->display_name }}</span>
+                                    </div>
+                                @else
+                                    <select id="nurse-on-duty-select" class="modern-date-input" style="padding-right: 40px; -webkit-appearance: none; min-width: 180px;">
+                                        <option value="">Select Nurse</option>
+                                        @php
+                                            $nurses = \App\Models\User::where('branch', auth()->user()->branch)
+                                                ->where('is_branch_account', false)
+                                                ->where('is_super_admin', false)
+                                                ->get();
+                                        @endphp
+                                        @foreach($nurses as $nurse)
+                                            <option value="{{ $nurse->id }}">{{ $nurse->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <i class="fa fa-chevron-down" style="position: absolute; right: 12px; color: #2953e8; pointer-events: none;"></i>
+                                @endif
                             </div>
                         </div>
                         @endif
@@ -99,8 +126,8 @@
 					<li class="nav-item dropdown header-profile">
 						<a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" data-toggle="dropdown">
 							<div class="header-info">
-								<span>{{ auth()->user()->name }}</span>
-								<small data-user-role>{{ auth()->user()->position }}</small>
+								<span>{{ auth()->user()->display_name }}</span>
+								<small data-user-role>{{ auth()->user()->display_position }}</small>
 							</div>
 						</a>
 						<div class="dropdown-menu dropdown-menu-end">
@@ -114,6 +141,17 @@
 								<span class="ms-2">Change pass </span>
 							</a>
 							
+
+							@if(session()->has('active_nurse_id'))
+							<form id="nurse-logout-form" action="{{ route('nurse.logout') }}" method="POST" style="display: none;">
+								@csrf
+							</form>
+							<a href="#" class="dropdown-item ai-icon text-danger" onclick="event.preventDefault(); document.getElementById('nurse-logout-form').submit();">
+								<i class="fa fa-sign-out-alt me-2"></i>
+								<span class="ms-2">Logout Nurse </span>
+							</a>
+							<div class="dropdown-divider"></div>
+							@endif
 
 							<div class="dropdown-divider"></div>
 							
@@ -137,3 +175,57 @@
 		</nav>
 	</div>
 </div>
+
+<div class="modal fade" id="nursePasswordModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nurse Login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('nurse.login') }}" method="POST">
+                @csrf
+                <input type="hidden" name="nurse_id" id="modal-nurse-id">
+                <div class="modal-body">
+                    <p class="mb-3">Enter password for <strong id="modal-nurse-name"></strong> to switch account for this branch.</p>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required placeholder="Enter nurse password" autofocus>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Switch to Nurse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.getElementById('nurse-on-duty-select');
+        if (select) {
+            select.addEventListener('change', function() {
+                if (this.value) {
+                    const nurseId = this.value;
+                    const nurseName = this.options[this.selectedIndex].text;
+                    document.getElementById('modal-nurse-id').value = nurseId;
+                    document.getElementById('modal-nurse-name').textContent = nurseName;
+                    
+                    const modalEl = document.getElementById('nursePasswordModal');
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                    
+                    // Focus password field when modal opens
+                    modalEl.addEventListener('shown.bs.modal', function () {
+                        modalEl.querySelector('input[type="password"]').focus();
+                    }, { once: true });
+                    
+                    // Reset select after modal opens
+                    this.value = '';
+                }
+            });
+        }
+    });
+</script>

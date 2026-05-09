@@ -7,18 +7,28 @@
     --primary: #3065D0 !important;
     --primary-hover: #2552a3 !important;
     --secondary: #2552a3 !important;
-    --danger: #3065D0 !important;
-    /* Force danger to also be blue for this project */
+    --danger: #ff5e5e !important;
+    /* Red for errors and danger states */
 }
 
 /* Direct Class Overrides for All Buttons */
 .btn-primary,
-.btn-danger,
 .btn-info,
 .btn-secondary,
 .btn-warning,
 .btn-success,
-.btn-dark,
+.btn-dark {
+    background-color: #3065D0 !important;
+    border-color: #3065D0 !important;
+    color: #fff !important;
+}
+
+.btn-danger {
+    background-color: #ff5e5e !important;
+    border-color: #ff5e5e !important;
+    color: #fff !important;
+}
+
 .btn-outline-primary:hover,
 .btn-outline-danger:hover,
 .btn-outline-warning:hover {
@@ -28,28 +38,21 @@
 }
 
 .btn-primary:hover,
-.btn-danger:hover,
 .btn-info:hover,
 .btn-secondary:hover,
 .btn-warning:hover,
 .btn-success:hover,
-.btn-dark:hover,
-.btn-primary:focus,
-.btn-danger:focus,
-.btn-info:focus,
-.btn-secondary:focus,
-.btn-warning:focus,
-.btn-success:focus,
-.btn-primary:active,
-.btn-danger:active,
-.btn-info:active,
-.btn-secondary:active,
-.btn-warning:active,
-.btn-success:active {
+.btn-dark:hover {
     background-color: #2552a3 !important;
     border-color: #2552a3 !important;
     color: #fff !important;
     box-shadow: 0 4px 15px rgba(48, 101, 208, 0.4) !important;
+}
+
+.btn-danger:hover {
+    background-color: #e54d4d !important;
+    border-color: #e54d4d !important;
+    color: #fff !important;
 }
 
 /* Outline Buttons */
@@ -63,11 +66,22 @@
 
 /* Badge Overrides */
 .badge-primary,
-.badge-danger,
 .badge-warning,
 .badge-info,
 .badge-success {
     background-color: #3065D0 !important;
+    color: #fff !important;
+}
+
+.badge-danger {
+    background-color: #ff5e5e !important;
+    color: #fff !important;
+}
+
+.alert-danger,
+.alert-danger.solid {
+    background-color: #ff5e5e !important;
+    border-color: #ff5e5e !important;
     color: #fff !important;
 }
 

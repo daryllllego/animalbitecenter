@@ -275,7 +275,7 @@ class AnimalBiteController extends Controller
         $validated['created_at'] = Carbon::parse($date)->setTimeFrom(Carbon::now());
         
         // Record the nurse who inputted the entry
-        $validated['nurse'] = auth()->user()->first_name . ' ' . auth()->user()->last_name;
+        $validated['nurse'] = auth()->user()->display_name;
         $validated['branch'] = auth()->user()->branch;
 
         MasterlistEntry::create($validated);
@@ -313,7 +313,7 @@ class AnimalBiteController extends Controller
                 'model_id' => $entry->id,
                 'action' => 'edit',
                 'user_id' => auth()->id(),
-                'nurse_name' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
+                'nurse_name' => auth()->user()->display_name,
                 'branch' => auth()->user()->branch,
                 'reason' => $request->reason,
                 'old_data' => $entry->load('patient')->toArray(),
@@ -337,7 +337,7 @@ class AnimalBiteController extends Controller
                 'model_id' => $entry->id,
                 'action' => 'delete',
                 'user_id' => auth()->id(),
-                'nurse_name' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
+                'nurse_name' => auth()->user()->display_name,
                 'branch' => auth()->user()->branch,
                 'reason' => $request->reason,
                 'old_data' => $entry->load('patient')->toArray(),

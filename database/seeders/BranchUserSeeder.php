@@ -40,7 +40,7 @@ class BranchUserSeeder extends Seeder
             ['first_name' => 'Aileen May', 'last_name' => 'Orcullo', 'branch' => 'Tubigon Branch', 'email' => 'allen22catel@gmail.com'],
             ['first_name' => 'John Kelly', 'last_name' => 'Gimena', 'branch' => 'Guadalupe Branch', 'email' => 'johnkellygimena@gmail.com'],
             ['first_name' => 'John Kent', 'last_name' => 'Zamora', 'branch' => 'Inabanga Branch', 'email' => 'zjohnkent@gmail.com'],
-            ['first_name' => 'Ma. Cristina', 'last_name' => 'Melecio', 'branch' => 'Tagbiliran Branch', 'email' => 'macristinamelecio12@gmail.com'],
+            ['first_name' => 'Ma. Cristina', 'last_name' => 'Melecio', 'branch' => 'Tagbilaran Branch', 'email' => 'macristinamelecio12@gmail.com'],
             ['first_name' => 'Stephanie Dulce', 'last_name' => 'Tulod', 'branch' => 'Guadalupe Branch', 'email' => 'tulodstephaniedulce@gmail.com'],
             ['first_name' => 'Florabel', 'last_name' => 'Amba', 'branch' => 'Talibon Branch', 'email' => 'florabelpolestico21@gmail.com'],
             ['first_name' => 'Lyra Faith', 'last_name' => 'Loon', 'branch' => 'Camotes Branch', 'email' => 'lyraloon00@gmail.com'],
@@ -76,10 +76,72 @@ class BranchUserSeeder extends Seeder
             ['first_name' => 'Vithil', 'last_name' => 'Tagalog', 'branch' => 'Liloan Branch', 'email' => 'vithiltagalog1986@gmail.com'],
             ['first_name' => 'Allyza Mae', 'last_name' => 'Gabutan', 'branch' => 'HR Office', 'email' => 'allyzamaegabutan1999@gmail.com'],
             ['first_name' => 'Darel', 'last_name' => 'Tibong', 'branch' => 'Assistant Admin', 'email' => 'darelamizolatibong.official@gmail.com'],
-            ['first_name' => 'Junibe', 'last_name' => 'Yecyec', 'branch' => 'Tagbiliran Branch', 'email' => 'junibeyecyec_15@yahoo.com'],
+            ['first_name' => 'Junibe', 'last_name' => 'Yecyec', 'branch' => 'Tagbilaran Branch', 'email' => 'junibeyecyec_15@yahoo.com'],
             ['first_name' => 'Ghiane Irish', 'last_name' => 'Ausejo', 'branch' => 'Tubigon Branch', 'email' => 'ghianeirishmanigo@gmail.com'],
             ['first_name' => 'Sheena', 'last_name' => 'Cerelejia', 'branch' => 'Ubay Branch', 'email' => 'scerelijia@gmail.com'],
         ];
+
+        $branchAccounts = [
+            ['first_name' => 'BABC', 'last_name' => 'Tagbilaran', 'branch' => 'Tagbilaran Branch', 'email' => 'babc.tagbilaran@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Talibon', 'branch' => 'Talibon Branch', 'email' => 'babc.talibon@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Tubigon', 'branch' => 'Tubigon Branch', 'email' => 'babc.tubigon@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Ubay', 'branch' => 'Ubay Branch', 'email' => 'babc.ubay@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Jagna', 'branch' => 'Jagna Branch', 'email' => 'babc.jagna@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Panglao', 'branch' => 'Panglao Branch', 'email' => 'babc.panglao@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Carmen', 'branch' => 'Carmen Branch', 'email' => 'babc.carmen@gmail.com'],
+            ['first_name' => 'BABC', 'last_name' => 'Inabanga', 'branch' => 'Inabanga Branch', 'email' => 'babc.inabanga@gmail.com'],
+
+            ['first_name' => 'CABC', 'last_name' => 'Mandaue', 'branch' => 'Mandaue Branch', 'email' => 'cabc.mandaue@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Talisay', 'branch' => 'Talisay Branch', 'email' => 'cabc.talisay@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Lapu-Lapu', 'branch' => 'Lapu-Lapu Branch', 'email' => 'cabc.lapulapu@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Bogo', 'branch' => 'Bogo Branch', 'email' => 'cabc.bogo@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Liloan', 'branch' => 'Liloan Branch', 'email' => 'cabc.liloan@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Consolacion', 'branch' => 'Consolacion Branch', 'email' => 'cabc.consolacion@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Camotes', 'branch' => 'Camotes Branch', 'email' => 'cabc.camotesisland@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Guadalupe', 'branch' => 'Guadalupe Branch', 'email' => 'cabc.guadalupe@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Balamban', 'branch' => 'Balamban Branch', 'email' => 'cabc.balamban@gmail.com'],
+        ];
+
+        // List of all branches to create relievers for
+        $branches = [
+            'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
+            'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
+            'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
+            'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'
+        ];
+
+        foreach ($branches as $branchName) {
+            $branchSlug = strtolower(str_replace(' Branch', '', $branchName));
+            $branchSlug = str_replace(' ', '', $branchSlug);
+            $email = "reliever." . $branchSlug . "@gmail.com";
+            
+            \App\Models\User::updateOrCreate(
+                ['email' => $email],
+                [
+                    'first_name' => 'Reliever',
+                    'last_name' => 'Nurse',
+                    'branch' => $branchName,
+                    'password' => $password,
+                    'plain_password' => '123456789',
+                    'status' => true,
+                    'position' => 'Nurse',
+                    'is_branch_account' => false
+                ]
+            );
+        }
+
+        foreach ($branchAccounts as $branchData) {
+            \App\Models\User::updateOrCreate(
+                ['email' => $branchData['email']],
+                array_merge($branchData, [
+                    'password' => $password,
+                    'plain_password' => '123456789',
+                    'status' => true,
+                    'position' => 'Branch Account',
+                    'is_branch_account' => true
+                ])
+            );
+        }
 
         foreach ($users as $userData) {
             \App\Models\User::updateOrCreate(

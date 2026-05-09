@@ -24,8 +24,12 @@ Route::middleware(['auth'])->group(function () {
     // Universal Storage Fallback
     Route::get('/storage/{path}', [FileController::class, 'serve'])->where('path', '.*');
 
-    // Animal Bite Center Module
-    Route::prefix('animal-bite')->name('animal-bite.')->group(function () {
+    // Nurse Session Routes
+    Route::post('/nurse/login', [App\Http\Controllers\NurseSessionController::class, 'login'])->name('nurse.login');
+    Route::post('/nurse/logout', [App\Http\Controllers\NurseSessionController::class, 'logout'])->name('nurse.logout');
+
+    // Animal Bite Center Module (Protected by Nurse on Duty for Branch Accounts)
+    Route::middleware(['nurse.on.duty'])->prefix('animal-bite')->name('animal-bite.')->group(function () {
         Route::get('/dashboard', [AnimalBiteController::class, 'dashboard'])->name('dashboard');
         Route::get('/monthly-report', [AnimalBiteController::class, 'monthlyReport'])->name('monthly-report');
         Route::get('/export-daily', [AnimalBiteController::class, 'exportDailyReport'])->name('export-daily');
