@@ -61,6 +61,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_super_admin' => 'boolean',
+        'is_branch_account' => 'boolean',
+        'status' => 'boolean',
     ];
 
     public function profile()
