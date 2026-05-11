@@ -61,7 +61,11 @@
                                             $nurses = \App\Models\User::where('branch', auth()->user()->branch)
                                                 ->where('is_branch_account', false)
                                                 ->where('is_super_admin', false)
-                                                ->get();
+                                                ->get()
+                                                ->sortBy(function($nurse) {
+                                                    return str_contains(strtolower($nurse->first_name), 'reliever') || 
+                                                           str_contains(strtolower($nurse->last_name), 'reliever');
+                                                });
                                         @endphp
                                         @foreach($nurses as $nurse)
                                             <option value="{{ $nurse->id }}">{{ $nurse->name }}</option>
