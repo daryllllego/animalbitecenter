@@ -264,9 +264,18 @@ class AnimalBiteController extends Controller
             'discount_type' => 'nullable|string',
             'discount_percentage' => 'nullable|numeric',
             'original_amount' => 'nullable|numeric',
+            'is_split_payment' => 'nullable|boolean',
+            'cash_amount' => 'nullable|numeric',
+            'online_amount' => 'nullable|numeric',
+            'online_payment_method' => 'nullable|string',
         ]);
 
         $validated['is_discounted'] = $request->has('is_discounted');
+        $validated['is_split_payment'] = $request->has('is_split_payment');
+
+        if ($validated['is_split_payment']) {
+            $validated['payment_method'] = 'SPLIT';
+        }
 
         // Use the session date for the entry creation if it's the current date,
         // but typically entries are for "Today".
@@ -298,6 +307,10 @@ class AnimalBiteController extends Controller
             'discount_type' => 'nullable|string',
             'discount_percentage' => 'nullable|numeric',
             'original_amount' => 'nullable|numeric',
+            'is_split_payment' => 'nullable|boolean',
+            'cash_amount' => 'nullable|numeric',
+            'online_amount' => 'nullable|numeric',
+            'online_payment_method' => 'nullable|string',
         ];
 
         if (auth()->user()->position !== 'Super Admin') {
@@ -306,6 +319,11 @@ class AnimalBiteController extends Controller
 
         $validated = $request->validate($rules);
         $validated['is_discounted'] = $request->has('is_discounted');
+        $validated['is_split_payment'] = $request->has('is_split_payment');
+
+        if ($validated['is_split_payment']) {
+            $validated['payment_method'] = 'SPLIT';
+        }
 
         if (auth()->user()->position !== 'Super Admin') {
             ApprovalRequest::create([
@@ -544,7 +562,8 @@ class AnimalBiteController extends Controller
                 'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
                 'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
                 'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
-                'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'
+                'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch',
+                'Carreta Branch'
             ];
 
             foreach ($branches as $branch) {
@@ -782,7 +801,7 @@ class AnimalBiteController extends Controller
                 $deductionsData = $deductionsQuery->selectRaw('branch, SUM(amount) as total_deductions')->groupBy('branch')->get()->keyBy('branch');
                 $onlineSalesData = $dailyRecordsQuery->selectRaw('branch, SUM(online_sales) as total_online_sales')->groupBy('branch')->get()->keyBy('branch');
 
-                $branches = ['Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'];
+                $branches = ['Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch', 'Carreta Branch'];
                 foreach ($branches as $b) {
                     if ($salesData->has($b) || $deductionsData->has($b)) {
                         $s = $salesData->get($b)->total_sales ?? 0;

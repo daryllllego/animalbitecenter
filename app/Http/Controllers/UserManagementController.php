@@ -30,6 +30,7 @@ class UserManagementController extends Controller
             'Liloan Branch',
             'Jagna Branch',
             'Ubay Branch',
+            'Carreta Branch',
             'Admin Head',
             'HR Office',
             'Assistant Admin',

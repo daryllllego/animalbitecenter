@@ -152,7 +152,11 @@
                                                 data-is-discounted="{{ $entry->is_discounted }}"
                                                 data-discount-type="{{ $entry->discount_type }}"
                                                 data-discount-percentage="{{ $entry->discount_percentage }}"
-                                                data-original-amount="{{ $entry->original_amount }}">
+                                                data-original-amount="{{ $entry->original_amount }}"
+                                                data-is-split-payment="{{ $entry->is_split_payment }}"
+                                                data-cash-amount="{{ $entry->cash_amount }}"
+                                                data-online-amount="{{ $entry->online_amount }}"
+                                                data-online-payment-method="{{ $entry->online_payment_method }}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
                                             
@@ -227,6 +231,43 @@
                                     placeholder="e.g. Alive (optional)">
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input split-payment-toggle" type="checkbox" id="is_split_payment" name="is_split_payment" value="1">
+                                    <label class="form-check-label font-weight-bold" for="is_split_payment">Split Payment (Cash & Online)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="split-payment-fields-container" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="cash_amount" class="form-label">Cash Payment</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control split-cash-input" id="cash_amount" name="cash_amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="online_amount" class="form-label">Online Payment</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control split-online-input" id="online_amount" name="online_amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="online_payment_method" class="form-label">Online Method</label>
+                                    <select class="form-control" id="online_payment_method" name="online_payment_method">
+                                        <option value="GCASH">GCASH</option>
+                                        <option value="BPI">BPI</option>
+                                        <option value="BDO">BDO</option>
+                                        <option value="GOTYME">GOTYME</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="amount_paid" class="form-label">Amount Paid</label>
@@ -244,6 +285,8 @@
                                     <option value="GCASH">GCASH</option>
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
+                                    <option value="GOTYME">GOTYME</option>
+                                    <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
                         </div>
@@ -340,6 +383,43 @@
                                 <input type="text" class="form-control" id="edit_animal_status" name="animal_status">
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input split-payment-toggle" type="checkbox" id="edit_is_split_payment" name="is_split_payment" value="1">
+                                    <label class="form-check-label font-weight-bold" for="edit_is_split_payment">Split Payment (Cash & Online)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="split-payment-fields-container" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_cash_amount" class="form-label">Cash Payment</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control split-cash-input" id="edit_cash_amount" name="cash_amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_online_amount" class="form-label">Online Payment</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" step="0.01" class="form-control split-online-input" id="edit_online_amount" name="online_amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit_online_payment_method" class="form-label">Online Method</label>
+                                    <select class="form-control" id="edit_online_payment_method" name="online_payment_method">
+                                        <option value="GCASH">GCASH</option>
+                                        <option value="BPI">BPI</option>
+                                        <option value="BDO">BDO</option>
+                                        <option value="GOTYME">GOTYME</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="edit_amount_paid" class="form-label">Amount Paid</label>
@@ -357,6 +437,8 @@
                                     <option value="GCASH">GCASH</option>
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
+                                    <option value="GOTYME">GOTYME</option>
+                                    <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
                         <div class="row mb-3">
@@ -506,6 +588,40 @@
                 }
             }
 
+            // Split Payment Logic
+            $('.split-payment-toggle').on('change', function () {
+                const modal = $(this).closest('.modal-content');
+                const container = modal.find('.split-payment-fields-container');
+                const paymentSelect = modal.find('.payment-method-select');
+                const referenceRow = modal.find('.reference-number-row');
+
+                if ($(this).is(':checked')) {
+                    container.slideDown();
+                    paymentSelect.val('SPLIT').trigger('change').prop('disabled', true);
+                    referenceRow.show().find('input').attr('required', true);
+                    
+                    // Add hidden input to form if it doesn't exist to ensure payment_method is sent
+                    if (modal.find('.payment-method-hidden').length === 0) {
+                        modal.find('form').append('<input type="hidden" name="payment_method" value="SPLIT" class="payment-method-hidden">');
+                    }
+                } else {
+                    container.slideUp();
+                    paymentSelect.prop('disabled', false).val('CASH').trigger('change');
+                    referenceRow.hide().find('input').attr('required', false).val('');
+                    modal.find('.payment-method-hidden').remove();
+                }
+            });
+
+            $('.split-cash-input, .split-online-input').on('input', function () {
+                const modal = $(this).closest('.modal-content');
+                const cash = parseFloat(modal.find('.split-cash-input').val()) || 0;
+                const online = parseFloat(modal.find('.split-online-input').val()) || 0;
+                const total = cash + online;
+                
+                const amountInput = modal.find('input[name="amount_paid"]');
+                amountInput.val(total.toFixed(2)).trigger('input');
+            });
+
             $('.discount-toggle').on('change', function () {
                 const modal = $(this).closest('.modal-content');
                 const amountInput = modal.find('input[name="amount_paid"]');
@@ -564,6 +680,10 @@
                 const discountType = $(this).data('discount-type');
                 const discountPercentage = $(this).data('discount-percentage');
                 const originalAmount = $(this).data('original-amount');
+                const isSplit = $(this).data('is-split-payment');
+                const cashAmount = $(this).data('cash-amount');
+                const onlineAmount = $(this).data('online-amount');
+                const onlineMethod = $(this).data('online-payment-method');
 
                 $('#edit_patient_id').val(patientId).trigger('change');
                 $('#edit_time').val(time);
@@ -573,6 +693,18 @@
                 $('#edit_payment_method').val(payment);
                 $('#edit_reference_number').val(reference);
                 $('#edit_remarks').val(remarks);
+
+                if (isSplit) {
+                    $('#edit_is_split_payment').prop('checked', true).trigger('change');
+                    $('#edit_cash_amount').val(cashAmount);
+                    $('#edit_online_amount').val(onlineAmount);
+                    $('#edit_online_payment_method').val(onlineMethod);
+                } else {
+                    $('#edit_is_split_payment').prop('checked', false).trigger('change');
+                    $('#edit_cash_amount').val('');
+                    $('#edit_online_amount').val('');
+                    $('#edit_online_payment_method').val('GCASH');
+                }
 
                 if (isDiscounted) {
                     $('#edit_is_discounted').prop('checked', true);

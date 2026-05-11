@@ -229,7 +229,7 @@
             });
 
             // Toggle password visibility for the table list
-            $('.toggle-password').on('click', function () {
+            $(document).on('click', '.toggle-password', function () {
                 var input = $(this).siblings('.password-field');
                 var icon = $(this).find('i');
 
@@ -243,7 +243,7 @@
             });
 
             // Toggle password visibility for modal inputs
-            $('.toggle-visibility').on('click', function () {
+            $(document).on('click', '.toggle-visibility', function () {
                 var input = $(this).siblings('.password-input');
                 var icon = $(this).find('i');
 

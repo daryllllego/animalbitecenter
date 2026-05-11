@@ -79,6 +79,9 @@ class BranchUserSeeder extends Seeder
             ['first_name' => 'Junibe', 'last_name' => 'Yecyec', 'branch' => 'Tagbilaran Branch', 'email' => 'junibeyecyec_15@yahoo.com'],
             ['first_name' => 'Ghiane Irish', 'last_name' => 'Ausejo', 'branch' => 'Tubigon Branch', 'email' => 'ghianeirishmanigo@gmail.com'],
             ['first_name' => 'Sheena', 'last_name' => 'Cerelejia', 'branch' => 'Ubay Branch', 'email' => 'scerelijia@gmail.com'],
+            ['first_name' => 'Stephanie Dulce', 'last_name' => 'Tulod', 'branch' => 'Carreta Branch', 'email' => 'stephanieDulceTulod@gmail.com'],
+            ['first_name' => 'Nike Joy', 'last_name' => 'Sison', 'branch' => 'Carreta Branch', 'email' => 'nikejoysison@gmail.com'],
+            ['first_name' => 'Reyvelen', 'last_name' => 'Cano-os', 'branch' => 'Carreta Branch', 'email' => 'reyvelencano-os@gmail.com'],
         ];
 
         $branchAccounts = [
@@ -100,6 +103,7 @@ class BranchUserSeeder extends Seeder
             ['first_name' => 'CABC', 'last_name' => 'Camotes', 'branch' => 'Camotes Branch', 'email' => 'cabc.camotesisland@gmail.com'],
             ['first_name' => 'CABC', 'last_name' => 'Guadalupe', 'branch' => 'Guadalupe Branch', 'email' => 'cabc.guadalupe@gmail.com'],
             ['first_name' => 'CABC', 'last_name' => 'Balamban', 'branch' => 'Balamban Branch', 'email' => 'cabc.balamban@gmail.com'],
+            ['first_name' => 'CABC', 'last_name' => 'Carreta', 'branch' => 'Carreta Branch', 'email' => 'cabc.carreta@gmail.com'],
         ];
 
         // List of all branches to create relievers for
@@ -107,7 +111,8 @@ class BranchUserSeeder extends Seeder
             'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
             'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
             'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
-            'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch'
+            'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch',
+            'Carreta Branch'
         ];
 
         foreach ($branches as $branchName) {

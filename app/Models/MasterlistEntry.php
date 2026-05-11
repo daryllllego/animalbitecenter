@@ -26,6 +26,10 @@ class MasterlistEntry extends Model
         'discount_type',
         'discount_percentage',
         'original_amount',
+        'is_split_payment',
+        'cash_amount',
+        'online_amount',
+        'online_payment_method',
     ];
 
     public function patient()
