@@ -263,6 +263,7 @@
                                         <option value="BPI">BPI</option>
                                         <option value="BDO">BDO</option>
                                         <option value="GOTYME">GOTYME</option>
+                                        <option value="MARIBANK">MARIBANK</option>
                                     </select>
                                 </div>
                             </div>
@@ -286,6 +287,7 @@
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
                                     <option value="GOTYME">GOTYME</option>
+                                    <option value="MARIBANK">MARIBANK</option>
                                     <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
@@ -415,6 +417,7 @@
                                         <option value="BPI">BPI</option>
                                         <option value="BDO">BDO</option>
                                         <option value="GOTYME">GOTYME</option>
+                                        <option value="MARIBANK">MARIBANK</option>
                                     </select>
                                 </div>
                             </div>
@@ -438,6 +441,7 @@
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
                                     <option value="GOTYME">GOTYME</option>
+                                    <option value="MARIBANK">MARIBANK</option>
                                     <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
@@ -734,7 +738,7 @@
             $('.payment-method-select').on('change', function () {
                 const method = $(this).val();
                 const row = $(this).closest('.modal-content').find('.reference-number-row');
-                if (['GCASH', 'BPI', 'BDO', 'GOTYME'].includes(method)) {
+                if (['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'].includes(method)) {
                     row.show();
                     row.find('input').attr('required', true);
                 } else {
