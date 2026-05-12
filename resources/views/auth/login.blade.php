@@ -34,10 +34,10 @@
             <!-- Left Panel - Logo and Branding -->
             <div class="card-left" style="background: linear-gradient(135deg, #2953e8 0%, #4f73ff 100%);">
                 <div class="logo-wrapper">
-                    <img src="{{ asset('images/cebuABC.png') }}" alt="Cebu Animal Bite Clinic Logo" class="logo"
+                    <img src="{{ asset('images/AbcVertical.png') }}" alt="Cebu Animal Bite Clinic Logo" class="logo"
                         style="max-width: 350px;">
                 </div>
-                <h1 class="brand-title">Cebu ABC</h1>
+                <h1 class="brand-title">Cebu and Bohol ABC</h1>
                 <p class="brand-subtitle">Animal Bite Center Management</p>
             </div>
 
@@ -80,7 +80,7 @@
                 </form>
 
                 <div class="form-footer">
-                    <p>&copy; {{ date('Y') }} Cebu Animal Bite Clinic. All rights reserved.</p>
+                    <p>&copy; {{ date('Y') }} Cebu and Bohol Animal Bite Clinic. All rights reserved.</p>
                 </div>
             </div>
         </div>
