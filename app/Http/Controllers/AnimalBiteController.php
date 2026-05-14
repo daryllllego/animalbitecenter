@@ -39,8 +39,11 @@ class AnimalBiteController extends Controller
         
         // Fully Automated Opening Cash: Total Historical Cash Sales - Total Historical Deductions (before today)
         $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-            ->where('payment_method', 'CASH')
-            ->sum('amount_paid');
+            ->where(function($q) {
+                $q->where('payment_method', 'CASH')
+                  ->orWhere('payment_method', 'SPLIT');
+            })
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
         $historicalDeductions = Deduction::where('date', '<', $date)
             ->sum('amount');
@@ -52,8 +55,19 @@ class AnimalBiteController extends Controller
         $totalDeductions = Deduction::whereDate('date', $date)->sum('amount');
         
         // New Calculations
-        $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'])->sum('amount_paid');
-        $totalCashSales = MasterlistEntry::whereDate('created_at', $date)->where('payment_method', 'CASH')->sum('amount_paid');
+        $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)
+            ->where(function($q) {
+                $q->whereIn('payment_method', ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'])
+                  ->orWhere('payment_method', 'SPLIT');
+            })
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN online_amount ELSE amount_paid END'));
+
+        $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
+            ->where(function($q) {
+                $q->where('payment_method', 'CASH')
+                  ->orWhere('payment_method', 'SPLIT');
+            })
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
         $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
 
         return view('animalbite.dashboard', [
@@ -140,11 +154,14 @@ class AnimalBiteController extends Controller
         // Opening = Total Historical Cash Sales - Total Historical Deductions (before today)
         
         $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-            ->where('payment_method', 'CASH')
+            ->where(function($q) {
+                $q->where('payment_method', 'CASH')
+                  ->orWhere('payment_method', 'SPLIT');
+            })
             ->when($branch !== 'All Branches', function($q) use ($branch) {
                 return $q->where('branch', $branch);
             })
-            ->sum('amount_paid');
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
         $historicalDeductions = Deduction::where('date', '<', $date)
             ->when($branch !== 'All Branches', function($q) use ($branch) {
@@ -156,11 +173,14 @@ class AnimalBiteController extends Controller
         
         // Today's Totals
         $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
-            ->where('payment_method', 'CASH')
+            ->where(function($q) {
+                $q->where('payment_method', 'CASH')
+                  ->orWhere('payment_method', 'SPLIT');
+            })
             ->when($branch !== 'All Branches', function($q) use ($branch) {
                 return $q->where('branch', $branch);
             })
-            ->sum('amount_paid');
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
         $totalDeductions = Deduction::whereDate('date', $date)
             ->when($branch !== 'All Branches', function($q) use ($branch) {
@@ -552,8 +572,11 @@ class AnimalBiteController extends Controller
             $onlineSalesData = MasterlistEntry::query()
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'])
-                ->selectRaw('branch, SUM(amount_paid) as total_online_sales')
+                ->where(function($q) {
+                    $q->whereIn('payment_method', ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'])
+                      ->orWhere('payment_method', 'SPLIT');
+                })
+                ->selectRaw('branch, SUM(CASE WHEN payment_method = "SPLIT" THEN online_amount ELSE amount_paid END) as total_online_sales')
                 ->groupBy('branch')
                 ->get()
                 ->keyBy('branch');
@@ -591,21 +614,27 @@ class AnimalBiteController extends Controller
             $totalOnlineSales = MasterlistEntry::query()
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'])
+                ->where(function($q) {
+                    $q->whereIn('payment_method', ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'])
+                      ->orWhere('payment_method', 'SPLIT');
+                })
                 ->when($selectedBranch !== 'All Branches', function($q) use ($selectedBranch) {
                     return $q->where('branch', $selectedBranch);
                 })
-                ->sum('amount_paid');
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN online_amount ELSE amount_paid END'));
         }
 
         $totalCashSales = MasterlistEntry::query()
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
-            ->where('payment_method', 'CASH')
+            ->where(function($q) {
+                $q->where('payment_method', 'CASH')
+                  ->orWhere('payment_method', 'SPLIT');
+            })
             ->when($selectedBranch !== 'All Branches', function($q) use ($selectedBranch) {
                 return $q->where('branch', $selectedBranch);
             })
-            ->sum('amount_paid');
+            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
 
         $netSales = ($totalCashSales - $totalDeductions);
 
@@ -666,18 +695,24 @@ class AnimalBiteController extends Controller
             $totalDeductions = $deductionsQuery->sum('amount');
             
             $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'])
+                ->where(function($q) {
+                    $q->whereIn('payment_method', ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'])
+                      ->orWhere('payment_method', 'SPLIT');
+                })
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
-                ->sum('amount_paid');
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN online_amount ELSE amount_paid END'));
             
             $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
-                ->where('payment_method', 'CASH')
+                ->where(function($q) {
+                    $q->where('payment_method', 'CASH')
+                      ->orWhere('payment_method', 'SPLIT');
+                })
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
-                ->sum('amount_paid');
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
             $openingRecord = CashRecord::where('date', $date)->where('shift', 'opening');
             if ($branch !== 'All Branches') {
@@ -766,19 +801,25 @@ class AnimalBiteController extends Controller
             
             $totalOnlineSales = MasterlistEntry::whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->whereIn('payment_method', ['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'])
+                ->where(function($q) {
+                    $q->whereIn('payment_method', ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'])
+                      ->orWhere('payment_method', 'SPLIT');
+                })
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
-                ->sum('amount_paid');
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN online_amount ELSE amount_paid END'));
             
             $totalCashSales = MasterlistEntry::whereMonth('created_at', $month)
                 ->whereYear('created_at', $year)
-                ->where('payment_method', 'CASH')
+                ->where(function($q) {
+                    $q->where('payment_method', 'CASH')
+                      ->orWhere('payment_method', 'SPLIT');
+                })
                 ->when($branch !== 'All Branches', function($q) use ($branch) {
                     return $q->where('branch', $branch);
                 })
-                ->sum('amount_paid');
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
                 
             $netSales = $totalCashSales - $totalDeductions;
 

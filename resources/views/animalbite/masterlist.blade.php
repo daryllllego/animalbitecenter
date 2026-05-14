@@ -42,21 +42,25 @@
         }
 
         .row-pending td {
-            background: #fff9c4 !important; /* Solid Yellow */
+            background: #fff9c4 !important;
+            /* Solid Yellow */
             color: #5d4037 !important;
             border-top: 1px solid #fbc02d !important;
             border-bottom: 1px solid #fbc02d !important;
         }
+
         .row-pending td:first-child {
             border-left: 10px solid #fbc02d !important;
         }
-        
+
         .row-approved td {
-            background: #e8f5e9 !important; /* Solid Green */
+            background: #e8f5e9 !important;
+            /* Solid Green */
             color: #1b5e20 !important;
             border-top: 1px solid #4caf50 !important;
             border-bottom: 1px solid #4caf50 !important;
         }
+
         .row-approved td:first-child {
             border-left: 10px solid #4caf50 !important;
         }
@@ -119,7 +123,8 @@
                             </thead>
                             <tbody>
                                 @foreach($entries as $entry)
-                                    <tr class="{{ in_array($entry->id, $pendingRequests) ? 'row-pending' : (in_array($entry->id, $approvedRequests) ? 'row-approved' : '') }}">
+                                    <tr
+                                        class="{{ in_array($entry->id, $pendingRequests) ? 'row-pending' : (in_array($entry->id, $approvedRequests) ? 'row-approved' : '') }}">
                                         <td>{{ \Carbon\Carbon::parse($entry->time)->format('h:i A') }}</td>
                                         <td class="text-start font-weight-bold">{{ $entry->patient->name }}</td>
                                         <td>{{ $entry->patient->age }}</td>
@@ -159,7 +164,7 @@
                                                 data-online-payment-method="{{ $entry->online_payment_method }}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
-                                            
+
                                             @if(auth()->user()->position === 'Super Admin')
                                                 <form action="{{ route('animal-bite.masterlist.destroy', $entry->id) }}"
                                                     method="POST" class="d-inline">
@@ -207,7 +212,8 @@
                                     <option value="" selected disabled>-- Choose Patient --</option>
                                     @foreach($patients as $patient)
                                         <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->age }}y/o,
-                                            {{ $patient->city }})</option>
+                                            {{ $patient->city }})
+                                        </option>
                                     @endforeach
                                 </select>
                                 <small class="text-muted">If patient is not listed, add them in Patient Management
@@ -234,8 +240,10 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input split-payment-toggle" type="checkbox" id="is_split_payment" name="is_split_payment" value="1">
-                                    <label class="form-check-label font-weight-bold" for="is_split_payment">Split Payment (Cash & Online)</label>
+                                    <input class="form-check-input split-payment-toggle" type="checkbox"
+                                        id="is_split_payment" name="is_split_payment" value="1">
+                                    <label class="form-check-label font-weight-bold" for="is_split_payment">Split Payment
+                                        (Cash & Online)</label>
                                 </div>
                             </div>
                         </div>
@@ -246,24 +254,31 @@
                                     <label for="cash_amount" class="form-label">Cash Payment</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control split-cash-input" id="cash_amount" name="cash_amount">
+                                        <input type="number" step="0.01" class="form-control split-cash-input"
+                                            id="cash_amount" name="cash_amount">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="online_amount" class="form-label">Online Payment</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control split-online-input" id="online_amount" name="online_amount">
+                                        <input type="number" step="0.01" class="form-control split-online-input"
+                                            id="online_amount" name="online_amount">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="online_payment_method" class="form-label">Online Method</label>
                                     <select class="form-control" id="online_payment_method" name="online_payment_method">
                                         <option value="GCASH">GCASH</option>
+                                        <option value="GCASH1">GCASH1</option>
+                                        <option value="GCASH2">GCASH2</option>
+                                        <option value="GCASH3">GCASH3</option>
+                                        <option value="GCASH4">GCASH4</option>
                                         <option value="BPI">BPI</option>
                                         <option value="BDO">BDO</option>
                                         <option value="GOTYME">GOTYME</option>
                                         <option value="MARIBANK">MARIBANK</option>
+                                        <option value="MAYA">MAYA</option>
                                     </select>
                                 </div>
                             </div>
@@ -284,10 +299,15 @@
                                     required>
                                     <option value="CASH">CASH</option>
                                     <option value="GCASH">GCASH</option>
+                                    <option value="GCASH1">GCASH1</option>
+                                    <option value="GCASH2">GCASH2</option>
+                                    <option value="GCASH3">GCASH3</option>
+                                    <option value="GCASH4">GCASH4</option>
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
                                     <option value="GOTYME">GOTYME</option>
                                     <option value="MARIBANK">MARIBANK</option>
+                                    <option value="MAYA">MAYA</option>
                                     <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
@@ -295,8 +315,10 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input discount-toggle" type="checkbox" id="is_discounted" name="is_discounted" value="1">
-                                    <label class="form-check-label font-weight-bold" for="is_discounted">Apply Discount</label>
+                                    <input class="form-check-input discount-toggle" type="checkbox" id="is_discounted"
+                                        name="is_discounted" value="1">
+                                    <label class="form-check-label font-weight-bold" for="is_discounted">Apply
+                                        Discount</label>
                                 </div>
                             </div>
                         </div>
@@ -312,13 +334,15 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
-                                    <input type="number" step="0.01" class="form-control discount-percentage" id="discount_percentage" name="discount_percentage" value="20">
+                                    <input type="number" step="0.01" class="form-control discount-percentage"
+                                        id="discount_percentage" name="discount_percentage" value="20">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="discounted_price" class="form-label">Discounted Price</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control discounted-price" id="discounted_price" readonly>
+                                        <input type="number" step="0.01" class="form-control discounted-price"
+                                            id="discounted_price" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -328,7 +352,7 @@
                             <div class="col-12 mb-3">
                                 <label for="reference_number" class="form-label">Reference Number</label>
                                 <input type="text" class="form-control" id="reference_number" name="reference_number"
-                                    placeholder="Enter Gcash/BPI/BDO reference number">
+                                    placeholder="Enter reference number">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -365,7 +389,8 @@
                                     required>
                                     @foreach($patients as $patient)
                                         <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->age }}y/o,
-                                            {{ $patient->city }})</option>
+                                            {{ $patient->city }})
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -388,8 +413,10 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input split-payment-toggle" type="checkbox" id="edit_is_split_payment" name="is_split_payment" value="1">
-                                    <label class="form-check-label font-weight-bold" for="edit_is_split_payment">Split Payment (Cash & Online)</label>
+                                    <input class="form-check-input split-payment-toggle" type="checkbox"
+                                        id="edit_is_split_payment" name="is_split_payment" value="1">
+                                    <label class="form-check-label font-weight-bold" for="edit_is_split_payment">Split
+                                        Payment (Cash & Online)</label>
                                 </div>
                             </div>
                         </div>
@@ -400,24 +427,32 @@
                                     <label for="edit_cash_amount" class="form-label">Cash Payment</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control split-cash-input" id="edit_cash_amount" name="cash_amount">
+                                        <input type="number" step="0.01" class="form-control split-cash-input"
+                                            id="edit_cash_amount" name="cash_amount">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="edit_online_amount" class="form-label">Online Payment</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control split-online-input" id="edit_online_amount" name="online_amount">
+                                        <input type="number" step="0.01" class="form-control split-online-input"
+                                            id="edit_online_amount" name="online_amount">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="edit_online_payment_method" class="form-label">Online Method</label>
-                                    <select class="form-control" id="edit_online_payment_method" name="online_payment_method">
+                                    <select class="form-control" id="edit_online_payment_method"
+                                        name="online_payment_method">
                                         <option value="GCASH">GCASH</option>
+                                        <option value="GCASH1">GCASH1</option>
+                                        <option value="GCASH2">GCASH2</option>
+                                        <option value="GCASH3">GCASH3</option>
+                                        <option value="GCASH4">GCASH4</option>
                                         <option value="BPI">BPI</option>
                                         <option value="BDO">BDO</option>
                                         <option value="GOTYME">GOTYME</option>
                                         <option value="MARIBANK">MARIBANK</option>
+                                        <option value="MAYA">MAYA</option>
                                     </select>
                                 </div>
                             </div>
@@ -438,51 +473,61 @@
                                     name="payment_method" required>
                                     <option value="CASH">CASH</option>
                                     <option value="GCASH">GCASH</option>
+                                    <option value="GCASH1">GCASH1</option>
+                                    <option value="GCASH2">GCASH2</option>
+                                    <option value="GCASH3">GCASH3</option>
+                                    <option value="GCASH4">GCASH4</option>
                                     <option value="BPI">BPI</option>
                                     <option value="BDO">BDO</option>
                                     <option value="GOTYME">GOTYME</option>
                                     <option value="MARIBANK">MARIBANK</option>
+                                    <option value="MAYA">MAYA</option>
                                     <option value="SPLIT">SPLIT (CASH & ONLINE)</option>
                                 </select>
                             </div>
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input discount-toggle" type="checkbox" id="edit_is_discounted" name="is_discounted" value="1">
-                                    <label class="form-check-label font-weight-bold" for="edit_is_discounted">Apply Discount</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="discount-fields-container" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="edit_discount_type" class="form-label">Discount For</label>
-                                    <select class="form-control" id="edit_discount_type" name="discount_type">
-                                        <option value="Senior Citizen">Senior Citizen</option>
-                                        <option value="PWD">PWD</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="edit_discount_percentage" class="form-label">Discount Percentage (%)</label>
-                                    <input type="number" step="0.01" class="form-control discount-percentage" id="edit_discount_percentage" name="discount_percentage" value="20">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="edit_discounted_price" class="form-label">Discounted Price</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₱</span>
-                                        <input type="number" step="0.01" class="form-control discounted-price" id="edit_discounted_price" readonly>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input discount-toggle" type="checkbox"
+                                            id="edit_is_discounted" name="is_discounted" value="1">
+                                        <label class="form-check-label font-weight-bold" for="edit_is_discounted">Apply
+                                            Discount</label>
                                     </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="original_amount" id="edit_original_amount">
-                        </div>
+
+                            <div class="discount-fields-container" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_discount_type" class="form-label">Discount For</label>
+                                        <select class="form-control" id="edit_discount_type" name="discount_type">
+                                            <option value="Senior Citizen">Senior Citizen</option>
+                                            <option value="PWD">PWD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_discount_percentage" class="form-label">Discount Percentage
+                                            (%)</label>
+                                        <input type="number" step="0.01" class="form-control discount-percentage"
+                                            id="edit_discount_percentage" name="discount_percentage" value="20">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_discounted_price" class="form-label">Discounted Price</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₱</span>
+                                            <input type="number" step="0.01" class="form-control discounted-price"
+                                                id="edit_discounted_price" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="original_amount" id="edit_original_amount">
+                            </div>
                         </div>
                         <div class="row reference-number-row" style="display: none;">
                             <div class="col-12 mb-3">
                                 <label for="edit_reference_number" class="form-label">Reference Number</label>
                                 <input type="text" class="form-control" id="edit_reference_number" name="reference_number"
-                                    placeholder="Enter Gcash/BPI/BDO reference number">
+                                    placeholder="Enter reference number">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -491,10 +536,12 @@
                         </div>
 
                         @if(auth()->user()->position !== 'Super Admin')
-                        <div class="mb-3">
-                            <label for="edit_reason" class="form-label text-danger font-weight-bold">Reason for Edit (Required for Approval)</label>
-                            <textarea class="form-control border-danger" id="edit_reason" name="reason" rows="2" required placeholder="Explain why you are editing this entry..."></textarea>
-                        </div>
+                            <div class="mb-3">
+                                <label for="edit_reason" class="form-label text-danger font-weight-bold">Reason for Edit
+                                    (Required for Approval)</label>
+                                <textarea class="form-control border-danger" id="edit_reason" name="reason" rows="2" required
+                                    placeholder="Explain why you are editing this entry..."></textarea>
+                            </div>
                         @endif
                     </div>
                     <div class="modal-footer">
@@ -511,16 +558,19 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title text-white">Request Deletion</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form id="deleteRequestForm" method="POST">
                     @csrf
                     @method('DELETE')
                     <div class="modal-body">
-                        <p class="text-dark">You are about to request the deletion of this entry. This action requires approval from a Super Admin.</p>
+                        <p class="text-dark">You are about to request the deletion of this entry. This action requires
+                            approval from a Super Admin.</p>
                         <div class="mb-3">
                             <label for="delete_reason" class="form-label font-weight-bold">Reason for Deletion</label>
-                            <textarea class="form-control border-danger" id="delete_reason" name="reason" rows="3" required placeholder="Explain why this entry should be deleted..."></textarea>
+                            <textarea class="form-control border-danger" id="delete_reason" name="reason" rows="3" required
+                                placeholder="Explain why this entry should be deleted..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -575,7 +625,7 @@
 
                 if (isDiscounted) {
                     let baseAmount = parseFloat(originalAmountInput.val()) || parseFloat(amountInput.val()) || 0;
-                    
+
                     if (!originalAmountInput.val()) {
                         originalAmountInput.val(amountInput.val());
                         baseAmount = parseFloat(amountInput.val()) || 0;
@@ -603,7 +653,7 @@
                     container.slideDown();
                     paymentSelect.val('SPLIT').trigger('change').prop('disabled', true);
                     referenceRow.show().find('input').attr('required', true);
-                    
+
                     // Add hidden input to form if it doesn't exist to ensure payment_method is sent
                     if (modal.find('.payment-method-hidden').length === 0) {
                         modal.find('form').append('<input type="hidden" name="payment_method" value="SPLIT" class="payment-method-hidden">');
@@ -621,7 +671,7 @@
                 const cash = parseFloat(modal.find('.split-cash-input').val()) || 0;
                 const online = parseFloat(modal.find('.split-online-input').val()) || 0;
                 const total = cash + online;
-                
+
                 const amountInput = modal.find('input[name="amount_paid"]');
                 amountInput.val(total.toFixed(2)).trigger('input');
             });
@@ -649,7 +699,7 @@
                 calculateDiscount(modal);
             });
 
-            $('input[name="amount_paid"]').on('input', function() {
+            $('input[name="amount_paid"]').on('input', function () {
                 const modal = $(this).closest('.modal-content');
                 const isDiscounted = modal.find('.discount-toggle').is(':checked');
                 if (isDiscounted) {
@@ -661,7 +711,7 @@
                 }
             });
 
-            $('form').on('submit', function() {
+            $('form').on('submit', function () {
                 const modal = $(this).closest('.modal-content');
                 const isDiscounted = modal.find('.discount-toggle').is(':checked');
                 if (isDiscounted) {
@@ -730,7 +780,7 @@
                 $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
-            $('.request-delete').on('click', function() {
+            $('.request-delete').on('click', function () {
                 const id = $(this).data('id');
                 $('#deleteRequestForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
@@ -738,7 +788,7 @@
             $('.payment-method-select').on('change', function () {
                 const method = $(this).val();
                 const row = $(this).closest('.modal-content').find('.reference-number-row');
-                if (['GCASH', 'BPI', 'BDO', 'GOTYME', 'MARIBANK'].includes(method)) {
+                if (['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'].includes(method)) {
                     row.show();
                     row.find('input').attr('required', true);
                 } else {
