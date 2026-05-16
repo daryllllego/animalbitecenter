@@ -207,7 +207,7 @@
                                                     data-amount="{{ $deduction->amount }}"
                                                     data-released_to="{{ $deduction->released_to }}" data-bs-toggle="modal"
                                                     data-bs-target="#editDeductionModal">
-                                                    <i class="fa fa-pencil"></i>
+                                                    <i class="fa fa-edit"></i>
                                                 </button>
                                                 <form action="{{ route('animal-bite.deductions.destroy', $deduction->id) }}"
                                                     method="POST"
@@ -256,7 +256,7 @@
                         <div class="mb-3">
                             <label for="released_by" class="form-label font-weight-bold">Released By</label>
                             <input type="text" class="form-control" id="released_by" name="released_by" required
-                                value="{{ auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
+                                value="{{ auth()->user()->display_name }}" readonly>
                         </div>
                         <div class="mb-3">
                             <label for="amount" class="form-label font-weight-bold">Amount</label>
