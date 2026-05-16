@@ -420,7 +420,15 @@ class AnimalBiteController extends Controller
         ]);
 
         $date = session('selected_date', Carbon::today()->toDateString());
-        $branch = session('selected_branch', 'All Branches');
+        // Determine the correct branch
+        if (auth()->user()->is_super_admin) {
+            $branch = session('selected_branch', 'All Branches');
+            if ($branch === 'All Branches') {
+                $branch = 'Mandaue Branch'; // Fallback for Super Admin in All Branches mode
+            }
+        } else {
+            $branch = auth()->user()->branch;
+        }
 
         Deduction::create([
             'description' => $validated['description'],
@@ -428,7 +436,7 @@ class AnimalBiteController extends Controller
             'amount' => $validated['amount'],
             'released_to' => $validated['released_to'],
             'date' => $date,
-            'branch' => $branch !== 'All Branches' ? $branch : 'Mandaue Branch' // Default if All Branches selected
+            'branch' => $branch
         ]);
 
         return redirect()->back()->with('success', 'Deduction added successfully!');
