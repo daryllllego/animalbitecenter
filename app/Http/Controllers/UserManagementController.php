@@ -21,7 +21,7 @@ class UserManagementController extends Controller
             'Tubigon Branch',
             'Guadalupe Branch',
             'Inabanga Branch',
-            'Tagbiliran Branch',
+            'Tagbilaran Branch',
             'Talibon Branch',
             'Camotes Branch',
             'Consolacion Branch',

@@ -50,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/deductions/{deduction}', [AnimalBiteController::class, 'deleteDeduction'])->name('deductions.destroy');
         Route::post('/set-date', [AnimalBiteController::class, 'setDate'])->name('set-date');
         Route::post('/update-daily-stats', [AnimalBiteController::class, 'updateDailyStats'])->name('update-daily-stats');
+        Route::post('/update-opening-cash', [AnimalBiteController::class, 'updateOpeningCash'])->name('update-opening-cash');
         Route::post('/cash-on-hand', [AnimalBiteController::class, 'storeCashRecord'])->name('cash-on-hand.store');
         Route::post('/inventory', [AnimalBiteController::class, 'storeInventory'])->name('inventory.store');
         Route::get('/inventory', [AnimalBiteController::class, 'inventory'])->name('inventory');

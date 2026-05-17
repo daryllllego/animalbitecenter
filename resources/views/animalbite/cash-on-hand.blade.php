@@ -51,6 +51,27 @@
 @endpush
 
 @section('content')
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-start border-primary border-4" style="background-color: #e3f2fd; border-radius: 12px;">
+            <div class="card-body d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <h5 class="text-primary font-weight-bold mb-0" style="letter-spacing: 0.5px;">Daily Starting Opening Cash</h5>
+                    <p class="text-muted small mb-0">The initial cash float balance for today</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="h4 text-primary font-weight-bold mb-0 me-3" style="font-size: 22px;">₱ {{ number_format($openingCash, 2) }}</span>
+                    @if($isEditable)
+                        <button class="btn btn-primary btn-sm rounded shadow-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#editStartingCashModal" style="border-radius: 8px; font-weight: 600;">
+                            <i class="fa fa-edit me-1"></i>Edit Starting Cash
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <ul class="nav nav-tabs" id="cashTabs" role="tablist">
@@ -182,10 +203,37 @@
                         </form>
                     </div>
                 </div>
+<!-- Edit Starting Cash Modal -->
+@if($isEditable)
+<div class="modal fade" id="editStartingCashModal" tabindex="-1" aria-labelledby="editStartingCashModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-primary font-weight-bold" id="editStartingCashModalLabel" style="font-size: 18px; letter-spacing: 0.5px;">EDIT DAILY STARTING CASH</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form action="{{ route('animal-bite.update-opening-cash') }}" method="POST">
+                @csrf
+                <div class="modal-body py-4">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted small mb-2">STARTING OPENING CASH AMOUNT</label>
+                        <div class="input-group" style="box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+                            <span class="input-group-text bg-light border-end-0 text-dark font-weight-bold" style="font-size: 16px; border: 1px solid #cbd5e1;">₱</span>
+                            <input type="number" step="0.01" name="opening_cash" class="form-control border-start-0 text-dark font-weight-bold" style="font-size: 16px; height: 45px; border: 1px solid #cbd5e1;" value="{{ $openingCash }}" required>
+                        </div>
+                        <span class="text-muted small d-block mt-2"><i class="fa fa-info-circle me-1"></i>Enter the daily cash float balance available when starting the clinic operations.</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded px-4" style="border-radius: 8px;">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+@endif
+
 @push('scripts')
 <script>
     $(document).ready(function() {

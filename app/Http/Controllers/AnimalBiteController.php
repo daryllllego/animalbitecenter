@@ -34,10 +34,9 @@ class AnimalBiteController extends Controller
     public function dashboard()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
+        $selectedBranch = session('selected_branch', 'All Branches');
         
-        $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
-        
-        // Fully Automated Opening Cash: Total Historical Cash Sales - Total Historical Deductions (before today)
+        // Automated opening cash calculation:
         $historicalSales = MasterlistEntry::where('created_at', '<', $date)
             ->where(function($q) {
                 $q->where('payment_method', 'CASH')
@@ -48,7 +47,21 @@ class AnimalBiteController extends Controller
         $historicalDeductions = Deduction::where('date', '<', $date)
             ->sum('amount');
             
-        $openingCash = $historicalSales - $historicalDeductions;
+        $defaultOpeningCash = $historicalSales - $historicalDeductions;
+
+        if ($selectedBranch !== 'All Branches') {
+            // For a specific branch, use/edit the DailyRecord
+            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
+                $dailyRecord->update(['opening_cash' => $defaultOpeningCash]);
+            }
+            $openingCash = $dailyRecord->opening_cash;
+            $isEditable = true;
+        } else {
+            // For All Branches mode, show the automated sum and make it read-only
+            $openingCash = $defaultOpeningCash;
+            $isEditable = false;
+        }
         
         $totalPatients = MasterlistEntry::whereDate('created_at', $date)->count();
         $totalSales = MasterlistEntry::whereDate('created_at', $date)->sum('amount_paid');
@@ -68,7 +81,11 @@ class AnimalBiteController extends Controller
                   ->orWhere('payment_method', 'SPLIT');
             })
             ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+        // Daily Net Sales = (Total Cash Sales - Total Deductions) + Opening Cash
         $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
+        
+        // Expected Cash in Drawer = (Opening Cash + Today's Cash Sales) - Today's Deductions
+        $expectedCash = ($openingCash + $totalCashSales) - $totalDeductions;
 
         return view('animalbite.dashboard', [
             'title' => 'Dashboard - Animal Bite Center',
@@ -79,10 +96,12 @@ class AnimalBiteController extends Controller
                 'sales' => $totalSales,
                 'deductions' => $totalDeductions,
                 'cash_sales' => $totalCashSales,
-                'expected_cash' => $netSales,
+                'net_sales' => $netSales,
+                'expected_cash' => $expectedCash,
                 'online_sales' => $totalOnlineSales,
                 'opening_cash' => $openingCash
             ],
+            'isEditable' => $isEditable,
             'selectedDate' => $date
         ]);
     }
@@ -90,6 +109,7 @@ class AnimalBiteController extends Controller
     public function cashOnHand()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
+        $branch = session('selected_branch', 'All Branches');
         
         $opening = CashRecord::where('date', $date)->where('shift', 'opening')->first();
         $closing = CashRecord::where('date', $date)->where('shift', 'closing')->first();
@@ -108,12 +128,47 @@ class AnimalBiteController extends Controller
             }
         }
 
+        // Get Starting/Opening Cash from DailyRecord (same logic as dashboard)
+        $isEditable = false;
+        if ($branch !== 'All Branches') {
+            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
+                $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                    ->where(function($q) {
+                        $q->where('payment_method', 'CASH')
+                          ->orWhere('payment_method', 'SPLIT');
+                    })
+                    ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                    
+                $historicalDeductions = Deduction::where('date', '<', $date)
+                    ->sum('amount');
+                    
+                $dailyRecord->update(['opening_cash' => $historicalSales - $historicalDeductions]);
+            }
+            $openingCash = $dailyRecord->opening_cash;
+            $isEditable = true;
+        } else {
+            $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                ->where(function($q) {
+                    $q->where('payment_method', 'CASH')
+                      ->orWhere('payment_method', 'SPLIT');
+                })
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                
+            $historicalDeductions = Deduction::where('date', '<', $date)
+                ->sum('amount');
+                
+            $openingCash = $historicalSales - $historicalDeductions;
+        }
+
         return view('animalbite.cash-on-hand', [
             'title' => 'Cash on Hand - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
             'sidebar' => 'animal-bite',
             'opening' => $opening,
             'closing' => $closing,
+            'openingCash' => $openingCash,
+            'isEditable' => $isEditable,
             'selectedDate' => $date
         ]);
     }
@@ -150,26 +205,35 @@ class AnimalBiteController extends Controller
         $date = session('selected_date', Carbon::today()->toDateString());
         $branch = session('selected_branch', 'All Branches');
         
-        // Fully Automated Calculation: 
-        // Opening = Total Historical Cash Sales - Total Historical Deductions (before today)
-        
-        $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-            ->where(function($q) {
-                $q->where('payment_method', 'CASH')
-                  ->orWhere('payment_method', 'SPLIT');
-            })
-            ->when($branch !== 'All Branches', function($q) use ($branch) {
-                return $q->where('branch', $branch);
-            })
-            ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
-            
-        $historicalDeductions = Deduction::where('date', '<', $date)
-            ->when($branch !== 'All Branches', function($q) use ($branch) {
-                return $q->where('branch', $branch);
-            })
-            ->sum('amount');
-            
-        $openingAmount = $historicalSales - $historicalDeductions;
+        if ($branch !== 'All Branches') {
+            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
+                $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                    ->where(function($q) {
+                        $q->where('payment_method', 'CASH')
+                          ->orWhere('payment_method', 'SPLIT');
+                    })
+                    ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                    
+                $historicalDeductions = Deduction::where('date', '<', $date)
+                    ->sum('amount');
+                    
+                $dailyRecord->update(['opening_cash' => $historicalSales - $historicalDeductions]);
+            }
+            $openingAmount = $dailyRecord->opening_cash;
+        } else {
+            $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                ->where(function($q) {
+                    $q->where('payment_method', 'CASH')
+                      ->orWhere('payment_method', 'SPLIT');
+                })
+                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                
+            $historicalDeductions = Deduction::where('date', '<', $date)
+                ->sum('amount');
+                
+            $openingAmount = $historicalSales - $historicalDeductions;
+        }
         
         // Today's Totals
         $totalCashSales = MasterlistEntry::whereDate('created_at', $date)
@@ -221,6 +285,8 @@ class AnimalBiteController extends Controller
             'c1' => ($salesTally->c1 ?? 0) - ($deductionTally->c1 ?? 0),
         ];
 
+        $isEditable = ($branch !== 'All Branches');
+
         return view('animalbite.cash-tracking', [
             'title' => 'Cash on Hand - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
@@ -233,7 +299,8 @@ class AnimalBiteController extends Controller
             'closingAmount' => $closingAmount,
             'variance' => $variance,
             'selectedDate' => $date,
-            'tally' => $tally
+            'tally' => $tally,
+            'isEditable' => $isEditable
         ]);
     }
 
@@ -552,6 +619,19 @@ class AnimalBiteController extends Controller
         return redirect()->back()->with('success', 'Daily stats updated!');
     }
 
+    public function updateOpeningCash(Request $request)
+    {
+        $request->validate([
+            'opening_cash' => 'required|numeric|min:0'
+        ]);
+
+        $date = session('selected_date', Carbon::today()->toDateString());
+        $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+        $dailyRecord->update(['opening_cash' => $request->opening_cash]);
+
+        return redirect()->back()->with('success', 'Opening cash updated successfully!');
+    }
+
     public function inventory()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
@@ -800,13 +880,38 @@ class AnimalBiteController extends Controller
                 })
                 ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
-            $openingRecord = CashRecord::where('date', $date)->where('shift', 'opening');
             if ($branch !== 'All Branches') {
-                $openingRecord->where('branch', $branch);
+                $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
+                if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
+                    $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                        ->where(function($q) {
+                            $q->where('payment_method', 'CASH')
+                              ->orWhere('payment_method', 'SPLIT');
+                        })
+                        ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                        
+                    $historicalDeductions = Deduction::where('date', '<', $date)
+                        ->sum('amount');
+                        
+                    $dailyRecord->update(['opening_cash' => $historicalSales - $historicalDeductions]);
+                }
+                $openingCash = $dailyRecord->opening_cash;
+            } else {
+                $historicalSales = MasterlistEntry::where('created_at', '<', $date)
+                    ->where(function($q) {
+                        $q->where('payment_method', 'CASH')
+                          ->orWhere('payment_method', 'SPLIT');
+                    })
+                    ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
+                    
+                $historicalDeductions = Deduction::where('date', '<', $date)
+                    ->sum('amount');
+                    
+                $openingCash = $historicalSales - $historicalDeductions;
             }
-            $openingCash = $openingRecord->sum('total_amount');
             
             $netSales = ($totalCashSales - $totalDeductions) + $openingCash;
+            $expectedCash = ($openingCash + $totalCashSales) - $totalDeductions;
 
             fputcsv($file, ["Metric", "Value"]);
             fputcsv($file, ["Total Patients", $totalPatients]);
@@ -816,6 +921,7 @@ class AnimalBiteController extends Controller
             fputcsv($file, ["Opening Cash Today", "P " . number_format($openingCash, 2)]);
             fputcsv($file, ["Total Deductions", "P " . number_format($totalDeductions, 2)]);
             fputcsv($file, ["Net Sales (Cash Sales - Deductions + Opening)", "P " . number_format($netSales, 2)]);
+            fputcsv($file, ["Expected Cash on Hand (Cash Sales - Deductions + Opening)", "P " . number_format($expectedCash, 2)]);
             fputcsv($file, []);
             fputcsv($file, []);
 

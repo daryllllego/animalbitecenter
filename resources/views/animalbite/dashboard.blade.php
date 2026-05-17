@@ -139,17 +139,16 @@
         </div>
 
         <!-- ROW 2 -->
-        <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="col-xl-6 col-sm-6 mb-4">
             <div class="card kpi-card bg-info-light border-start border-info border-4">
                 <div class="card-body">
                     <div class="kpi-title">NET SALES</div>
-                    <div class="kpi-value text-info">₱ {{ number_format($stats['expected_cash'], 2) }}</div>
-
+                    <div class="kpi-value text-info">₱ {{ number_format($stats['net_sales'], 2) }}</div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="col-xl-6 col-sm-6 mb-4">
             <div class="card kpi-card bg-secondary-light border-start border-secondary border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
