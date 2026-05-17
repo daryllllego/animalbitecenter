@@ -117,4 +117,12 @@ class User extends Authenticatable
         }
         return $this->position;
     }
+
+    /**
+     * Determine if the user is a super admin.
+     */
+    public function getIsSuperAdminAttribute()
+    {
+        return $this->position === 'Super Admin' || $this->attributes['is_super_admin'];
+    }
 }
