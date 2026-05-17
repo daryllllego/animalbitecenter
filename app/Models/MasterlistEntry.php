@@ -30,6 +30,16 @@ class MasterlistEntry extends Model
         'cash_amount',
         'online_amount',
         'online_payment_method',
+        'denom_1000',
+        'denom_500',
+        'denom_200',
+        'denom_100',
+        'denom_50',
+        'denom_20',
+        'coin_20',
+        'coin_10',
+        'coin_5',
+        'coin_1',
     ];
 
     public function patient()

@@ -205,7 +205,18 @@
                                                     data-description="{{ $deduction->description }}"
                                                     data-released_by="{{ $deduction->released_by }}"
                                                     data-amount="{{ $deduction->amount }}"
-                                                    data-released_to="{{ $deduction->released_to }}" data-bs-toggle="modal"
+                                                    data-released_to="{{ $deduction->released_to }}"
+                                                    data-denom1000="{{ $deduction->denom_1000 }}"
+                                                    data-denom500="{{ $deduction->denom_500 }}"
+                                                    data-denom200="{{ $deduction->denom_200 }}"
+                                                    data-denom100="{{ $deduction->denom_100 }}"
+                                                    data-denom50="{{ $deduction->denom_50 }}"
+                                                    data-denom20="{{ $deduction->denom_20 }}"
+                                                    data-coin20="{{ $deduction->coin_20 }}"
+                                                    data-coin10="{{ $deduction->coin_10 }}"
+                                                    data-coin5="{{ $deduction->coin_5 }}"
+                                                    data-coin1="{{ $deduction->coin_1 }}"
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#editDeductionModal">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
@@ -271,6 +282,29 @@
                             <input type="text" class="form-control" id="released_to" name="released_to" required
                                 placeholder="e.g. Messenger Service">
                         </div>
+
+                        <hr>
+                        <h6 class="font-w700 mb-3"><i class="fa fa-money-bill-wave me-2 text-danger"></i>CASH DENOMINATION BREAKDOWN</h6>
+                        <div class="row g-2">
+                            @foreach([1000, 500, 200, 100, 50, 20] as $denom)
+                            <div class="col-6 mb-2">
+                                <label class="small mb-0">₱ {{ number_format($denom) }}</label>
+                                <input type="number" name="denom_{{ $denom }}" class="form-control form-control-sm denom-input" data-value="{{ $denom }}" min="0" placeholder="0">
+                            </div>
+                            @endforeach
+                            @foreach([20, 10, 5, 1] as $coin)
+                            <div class="col-6 mb-2">
+                                <label class="small mb-0">₱ {{ $coin }} Coin</label>
+                                <input type="number" name="coin_{{ $coin }}" class="form-control form-control-sm denom-input" data-value="{{ $coin }}" min="0" placeholder="0">
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="alert alert-danger py-2 mt-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small fw-bold">TOTAL FROM DENOMINATION:</span>
+                                <span class="fw-bold">₱ <span id="denom-total">0.00</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
@@ -315,6 +349,29 @@
                             <label for="edit_released_to" class="form-label font-weight-bold">Released To</label>
                             <input type="text" class="form-control" id="edit_released_to" name="released_to" required>
                         </div>
+
+                        <hr>
+                        <h6 class="font-w700 mb-3"><i class="fa fa-money-bill-wave me-2 text-primary"></i>CASH DENOMINATION BREAKDOWN</h6>
+                        <div class="row g-2">
+                            @foreach([1000, 500, 200, 100, 50, 20] as $denom)
+                            <div class="col-6 mb-2">
+                                <label class="small mb-0">₱ {{ number_format($denom) }}</label>
+                                <input type="number" name="denom_{{ $denom }}" id="edit_denom_{{ $denom }}" class="form-control form-control-sm edit-denom-input" data-value="{{ $denom }}" min="0" placeholder="0">
+                            </div>
+                            @endforeach
+                            @foreach([20, 10, 5, 1] as $coin)
+                            <div class="col-6 mb-2">
+                                <label class="small mb-0">₱ {{ $coin }} Coin</label>
+                                <input type="number" name="coin_{{ $coin }}" id="edit_coin_{{ $coin }}" class="form-control form-control-sm edit-denom-input" data-value="{{ $coin }}" min="0" placeholder="0">
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="alert alert-primary py-2 mt-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small fw-bold">TOTAL FROM DENOMINATION:</span>
+                                <span class="fw-bold">₱ <span id="edit-denom-total">0.00</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
@@ -328,6 +385,32 @@
     @push('scripts')
         <script>
             $(document).ready(function () {
+                function calculateDenomTotal() {
+                    let total = 0;
+                    $('.denom-input').each(function() {
+                        let count = parseInt($(this).val()) || 0;
+                        let value = parseInt($(this).data('value'));
+                        total += count * value;
+                    });
+                    $('#denom-total').text(total.toLocaleString('en-US', {minimumFractionDigits: 2}));
+                    $('#amount').val(total);
+                }
+
+                $('.denom-input').on('input', calculateDenomTotal);
+
+                function calculateEditDenomTotal() {
+                    let total = 0;
+                    $('.edit-denom-input').each(function() {
+                        let count = parseInt($(this).val()) || 0;
+                        let value = parseInt($(this).data('value'));
+                        total += count * value;
+                    });
+                    $('#edit-denom-total').text(total.toLocaleString('en-US', {minimumFractionDigits: 2}));
+                    $('#edit_amount').val(total);
+                }
+
+                $('.edit-denom-input').on('input', calculateEditDenomTotal);
+
                 $('.editDeductionBtn').on('click', function () {
                     const id = $(this).data('id');
                     const description = $(this).data('description');
@@ -342,6 +425,20 @@
                     $('#edit_released_by').val(released_by);
                     $('#edit_amount').val(amount);
                     $('#edit_released_to').val(released_to);
+
+                    // Set denominations
+                    $('#edit_denom_1000').val($(this).data('denom1000') || '');
+                    $('#edit_denom_500').val($(this).data('denom500') || '');
+                    $('#edit_denom_200').val($(this).data('denom200') || '');
+                    $('#edit_denom_100').val($(this).data('denom100') || '');
+                    $('#edit_denom_50').val($(this).data('denom50') || '');
+                    $('#edit_denom_20').val($(this).data('denom20') || '');
+                    $('#edit_coin_20').val($(this).data('coin20') || '');
+                    $('#edit_coin_10').val($(this).data('coin10') || '');
+                    $('#edit_coin_5').val($(this).data('coin5') || '');
+                    $('#edit_coin_1').val($(this).data('coin1') || '');
+
+                    calculateEditDenomTotal();
                 });
             });
         </script>

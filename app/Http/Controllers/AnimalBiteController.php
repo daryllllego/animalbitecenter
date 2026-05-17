@@ -194,6 +194,33 @@ class AnimalBiteController extends Controller
         $closingAmount = $expectedCash;
         $variance = 0;
 
+        $salesTally = MasterlistEntry::whereDate('created_at', $date)
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->selectRaw('SUM(denom_1000) as d1000, SUM(denom_500) as d500, SUM(denom_200) as d200, SUM(denom_100) as d100, SUM(denom_50) as d50, SUM(denom_20) as d20, SUM(coin_20) as c20, SUM(coin_10) as c10, SUM(coin_5) as c5, SUM(coin_1) as c1')
+            ->first();
+
+        $deductionTally = Deduction::whereDate('date', $date)
+            ->when($branch !== 'All Branches', function($q) use ($branch) {
+                return $q->where('branch', $branch);
+            })
+            ->selectRaw('SUM(denom_1000) as d1000, SUM(denom_500) as d500, SUM(denom_200) as d200, SUM(denom_100) as d100, SUM(denom_50) as d50, SUM(denom_20) as d20, SUM(coin_20) as c20, SUM(coin_10) as c10, SUM(coin_5) as c5, SUM(coin_1) as c1')
+            ->first();
+
+        $tally = (object)[
+            'd1000' => ($salesTally->d1000 ?? 0) - ($deductionTally->d1000 ?? 0),
+            'd500' => ($salesTally->d500 ?? 0) - ($deductionTally->d500 ?? 0),
+            'd200' => ($salesTally->d200 ?? 0) - ($deductionTally->d200 ?? 0),
+            'd100' => ($salesTally->d100 ?? 0) - ($deductionTally->d100 ?? 0),
+            'd50' => ($salesTally->d50 ?? 0) - ($deductionTally->d50 ?? 0),
+            'd20' => ($salesTally->d20 ?? 0) - ($deductionTally->d20 ?? 0),
+            'c20' => ($salesTally->c20 ?? 0) - ($deductionTally->c20 ?? 0),
+            'c10' => ($salesTally->c10 ?? 0) - ($deductionTally->c10 ?? 0),
+            'c5' => ($salesTally->c5 ?? 0) - ($deductionTally->c5 ?? 0),
+            'c1' => ($salesTally->c1 ?? 0) - ($deductionTally->c1 ?? 0),
+        ];
+
         return view('animalbite.cash-tracking', [
             'title' => 'Cash on Hand - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
@@ -205,7 +232,8 @@ class AnimalBiteController extends Controller
             'expectedCash' => $expectedCash,
             'closingAmount' => $closingAmount,
             'variance' => $variance,
-            'selectedDate' => $date
+            'selectedDate' => $date,
+            'tally' => $tally
         ]);
     }
 
@@ -288,10 +316,26 @@ class AnimalBiteController extends Controller
             'cash_amount' => 'nullable|numeric',
             'online_amount' => 'nullable|numeric',
             'online_payment_method' => 'nullable|string',
+            'denom_1000' => 'nullable|integer|min:0',
+            'denom_500' => 'nullable|integer|min:0',
+            'denom_200' => 'nullable|integer|min:0',
+            'denom_100' => 'nullable|integer|min:0',
+            'denom_50' => 'nullable|integer|min:0',
+            'denom_20' => 'nullable|integer|min:0',
+            'coin_20' => 'nullable|integer|min:0',
+            'coin_10' => 'nullable|integer|min:0',
+            'coin_5' => 'nullable|integer|min:0',
+            'coin_1' => 'nullable|integer|min:0',
         ]);
 
         $validated['is_discounted'] = $request->has('is_discounted');
         $validated['is_split_payment'] = $request->has('is_split_payment');
+
+        // Ensure denominations are integers and default to 0 if null
+        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
+        foreach ($denoms as $denom) {
+            $validated[$denom] = $validated[$denom] ?? 0;
+        }
 
         if ($validated['is_split_payment']) {
             $validated['payment_method'] = 'SPLIT';
@@ -331,13 +375,29 @@ class AnimalBiteController extends Controller
             'cash_amount' => 'nullable|numeric',
             'online_amount' => 'nullable|numeric',
             'online_payment_method' => 'nullable|string',
+            'denom_1000' => 'nullable|integer|min:0',
+            'denom_500' => 'nullable|integer|min:0',
+            'denom_200' => 'nullable|integer|min:0',
+            'denom_100' => 'nullable|integer|min:0',
+            'denom_50' => 'nullable|integer|min:0',
+            'denom_20' => 'nullable|integer|min:0',
+            'coin_20' => 'nullable|integer|min:0',
+            'coin_10' => 'nullable|integer|min:0',
+            'coin_5' => 'nullable|integer|min:0',
+            'coin_1' => 'nullable|integer|min:0',
         ];
 
-        if (auth()->user()->position !== 'Super Admin') {
-            $rules['reason'] = 'required|string';
+        // Ensure denominations are integers and default to 0 if null
+        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
+        foreach ($denoms as $denom) {
+            $rules[$denom] = 'nullable|integer|min:0';
         }
 
         $validated = $request->validate($rules);
+
+        foreach ($denoms as $denom) {
+            $validated[$denom] = $validated[$denom] ?? 0;
+        }
         $validated['is_discounted'] = $request->has('is_discounted');
         $validated['is_split_payment'] = $request->has('is_split_payment');
 
@@ -430,14 +490,22 @@ class AnimalBiteController extends Controller
             $branch = auth()->user()->branch;
         }
 
-        Deduction::create([
+        $data = [
             'description' => $validated['description'],
             'released_by' => $validated['released_by'],
             'amount' => $validated['amount'],
             'released_to' => $validated['released_to'],
             'date' => $date,
             'branch' => $branch
-        ]);
+        ];
+
+        // Handle denominations
+        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
+        foreach ($denoms as $denom) {
+            $data[$denom] = $request->input($denom) ?: 0;
+        }
+
+        Deduction::create($data);
 
         return redirect()->back()->with('success', 'Deduction added successfully!');
     }
@@ -451,7 +519,17 @@ class AnimalBiteController extends Controller
             'released_to' => 'required|string'
         ]);
 
-        $deduction->update($validated);
+        $data = $validated;
+        
+        // Handle denominations
+        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
+        foreach ($denoms as $denom) {
+            if ($request->has($denom)) {
+                $data[$denom] = $request->input($denom) ?: 0;
+            }
+        }
+
+        $deduction->update($data);
 
         return redirect()->back()->with('success', 'Deduction updated successfully!');
     }
