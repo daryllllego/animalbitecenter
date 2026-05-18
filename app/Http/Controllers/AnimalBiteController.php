@@ -166,6 +166,7 @@ class AnimalBiteController extends Controller
             'denom_100' => 'nullable|integer|min:0',
             'denom_50' => 'nullable|integer|min:0',
             'denom_20' => 'nullable|integer|min:0',
+            'coin_20' => 'nullable|integer|min:0',
             'denom_10' => 'nullable|integer|min:0',
             'denom_5' => 'nullable|integer|min:0',
             'denom_1' => 'nullable|integer|min:0',
@@ -180,8 +181,8 @@ class AnimalBiteController extends Controller
         $validated['branch'] = $branch;
 
         // Default any null inputs to 0
-        foreach ([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom) {
-            $validated['denom_' . $denom] = $validated['denom_' . $denom] ?? 0;
+        foreach (['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'denom_10', 'denom_5', 'denom_1'] as $denomField) {
+            $validated[$denomField] = $validated[$denomField] ?? 0;
         }
 
         $cashRecord = CashRecord::updateOrCreate(
@@ -241,11 +242,11 @@ class AnimalBiteController extends Controller
         
         if ($branch === 'All Branches') {
             $closingAmount = CashRecord::where('date', $date)->where('shift', 'closing')->sum('total_amount');
-            $hasClosing = CashRecord::where('date', $date)->where('shift', 'closing')->exists();
+            $hasClosing = CashRecord::where('date', $date)->where('shift', 'closing')->where('total_amount', '>', 0)->exists();
             $closingAmountDisplay = $hasClosing ? $closingAmount : null;
         } else {
             $closingRecord = CashRecord::where('date', $date)->where('shift', 'closing')->first();
-            $closingAmountDisplay = $closingRecord ? $closingRecord->total_amount : null;
+            $closingAmountDisplay = ($closingRecord && $closingRecord->total_amount > 0) ? $closingRecord->total_amount : null;
         }
 
         $variance = $closingAmountDisplay !== null ? ($closingAmountDisplay - $expectedCash) : 0;
@@ -278,6 +279,7 @@ class AnimalBiteController extends Controller
                 'denom_100' => $openingTallies->sum('denom_100'),
                 'denom_50' => $openingTallies->sum('denom_50'),
                 'denom_20' => $openingTallies->sum('denom_20'),
+                'coin_20' => $openingTallies->sum('coin_20'),
                 'denom_10' => $openingTallies->sum('denom_10'),
                 'denom_5' => $openingTallies->sum('denom_5'),
                 'denom_1' => $openingTallies->sum('denom_1'),
@@ -290,6 +292,7 @@ class AnimalBiteController extends Controller
                 'denom_100' => $closingTallies->sum('denom_100'),
                 'denom_50' => $closingTallies->sum('denom_50'),
                 'denom_20' => $closingTallies->sum('denom_20'),
+                'coin_20' => $closingTallies->sum('coin_20'),
                 'denom_10' => $closingTallies->sum('denom_10'),
                 'denom_5' => $closingTallies->sum('denom_5'),
                 'denom_1' => $closingTallies->sum('denom_1'),
@@ -299,13 +302,13 @@ class AnimalBiteController extends Controller
         if (!$openingTallyRecord) {
             $openingTallyRecord = (object)[
                 'denom_1000' => 0, 'denom_500' => 0, 'denom_200' => 0, 'denom_100' => 0,
-                'denom_50' => 0, 'denom_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
+                'denom_50' => 0, 'denom_20' => 0, 'coin_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
             ];
         }
         if (!$closingTallyRecord) {
             $closingTallyRecord = (object)[
                 'denom_1000' => 0, 'denom_500' => 0, 'denom_200' => 0, 'denom_100' => 0,
-                'denom_50' => 0, 'denom_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
+                'denom_50' => 0, 'denom_20' => 0, 'coin_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
             ];
         }
 

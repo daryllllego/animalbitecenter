@@ -73,6 +73,20 @@
 @endpush
 
 @section('content')
+@php
+    $denominations = [
+        'denom_1000' => ['val' => 1000, 'label' => '₱ 1,000 Bill'],
+        'denom_500' => ['val' => 500, 'label' => '₱ 500 Bill'],
+        'denom_200' => ['val' => 200, 'label' => '₱ 200 Bill'],
+        'denom_100' => ['val' => 100, 'label' => '₱ 100 Bill'],
+        'denom_50' => ['val' => 50, 'label' => '₱ 50 Bill'],
+        'denom_20' => ['val' => 20, 'label' => '₱ 20 Bill'],
+        'coin_20' => ['val' => 20, 'label' => '₱ 20 Coin'],
+        'denom_10' => ['val' => 10, 'label' => '₱ 10 Coin'],
+        'denom_5' => ['val' => 5, 'label' => '₱ 5 Coin'],
+        'denom_1' => ['val' => 1, 'label' => '₱ 1 Coin'],
+    ];
+@endphp
 <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
@@ -162,7 +176,7 @@
                     </div>
                     <div>
                         <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Actual Cash</div>
-                        <div class="tracking-value text-info" style="font-size: 15px;">₱{{ number_format($closingAmount, 2) }}</div>
+                        <div class="tracking-value text-info" style="font-size: 15px;">{{ $closingAmount !== null ? '₱' . number_format($closingAmount, 2) : 'Not Closed' }}</div>
                     </div>
                 </div>
             </div>
@@ -173,7 +187,15 @@
         <div class="card tracking-card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
-                    @if($variance > 0)
+                    @if($closingAmount === null)
+                        <div class="tracking-icon bg-soft-secondary mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                            <i class="fa fa-info-circle text-muted" style="font-size: 14px;"></i>
+                        </div>
+                        <div>
+                            <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Variance</div>
+                            <div class="tracking-value text-muted" style="font-size: 15px;">Pending</div>
+                        </div>
+                    @elseif($variance > 0)
                         <div class="tracking-icon bg-soft-success mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
                             <i class="fa fa-caret-up" style="font-size: 16px;"></i>
                         </div>
@@ -227,16 +249,20 @@
                             <span class="badge bg-soft-primary px-3 py-1 rounded">Total: ₱{{ number_format($openingAmount, 2) }}</span>
                         </div>
                         <div class="pe-md-3">
-                            @foreach([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom)
+                            <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded" style="font-size: 12px;">
+                                <span class="text-muted"><i class="fa fa-user-edit text-primary me-1"></i>Recorded By:</span>
+                                <span class="font-w700 text-primary">{{ ($openingTally && isset($openingTally->nurse_on_duty) && $openingTally->nurse_on_duty) ? $openingTally->nurse_on_duty : 'Not Recorded' }}</span>
+                            </div>
+                            @foreach($denominations as $key => $denom)
                                 @php
-                                    $qty = $openingTally ? $openingTally->{'denom_' . $denom} : 0;
+                                    $qty = $openingTally ? ($openingTally->{$key} ?? 0) : 0;
                                 @endphp
                                 <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                    <span class="text-muted fw-bold">₱ {{ number_format($denom) }}</span>
+                                    <span class="text-muted fw-bold">{{ $denom['label'] }}</span>
                                     <div class="text-end">
                                         <span class="font-w800 text-primary h6 mb-0">{{ number_format($qty) }}</span>
                                         <small class="text-muted ms-1">pcs</small>
-                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom * $qty) }}</span>
+                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom['val'] * $qty) }}</span>
                                     </div>
                                 </div>
                             @endforeach
@@ -256,16 +282,20 @@
                             <span class="badge bg-soft-danger px-3 py-1 rounded">Total: ₱{{ number_format($closingAmount, 2) }}</span>
                         </div>
                         <div class="ps-md-3">
-                            @foreach([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom)
+                            <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded" style="font-size: 12px;">
+                                <span class="text-muted"><i class="fa fa-user-edit text-danger me-1"></i>Recorded By:</span>
+                                <span class="font-w700 text-danger">{{ ($closingTally && isset($closingTally->nurse_on_duty) && $closingTally->nurse_on_duty) ? $closingTally->nurse_on_duty : 'Not Recorded' }}</span>
+                            </div>
+                            @foreach($denominations as $key => $denom)
                                 @php
-                                    $qty = $closingTally ? $closingTally->{'denom_' . $denom} : 0;
+                                    $qty = $closingTally ? ($closingTally->{$key} ?? 0) : 0;
                                 @endphp
                                 <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                    <span class="text-muted fw-bold">₱ {{ number_format($denom) }}</span>
+                                    <span class="text-muted fw-bold">{{ $denom['label'] }}</span>
                                     <div class="text-end">
                                         <span class="font-w800 text-danger h6 mb-0">{{ number_format($qty) }}</span>
                                         <small class="text-muted ms-1">pcs</small>
-                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom * $qty) }}</span>
+                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom['val'] * $qty) }}</span>
                                     </div>
                                 </div>
                             @endforeach
@@ -361,14 +391,17 @@
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-end">
                         <span class="text-white-50 small fw-bold">ACTUAL CLOSING</span>
-                        <h4 class="text-white mb-0 font-w700">₱ {{ number_format($closingAmount, 2) }}</h4>
+                        <h4 class="text-white mb-0 font-w700">{{ $closingAmount !== null ? '₱ ' . number_format($closingAmount, 2) : 'Not Closed' }}</h4>
                     </div>
                 </div>
                 
                 <div class="p-3 rounded mt-4" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
                     <div class="text-center">
                         <span class="text-white-50 small fw-bold d-block mb-1">VARIANCE TALLY</span>
-                        @if($variance > 0)
+                        @if($closingAmount === null)
+                            <h2 class="text-white mb-0 font-w800" style="font-size: 24px;">NO CLOSING COUNT</h2>
+                            <small class="text-white-50 fw-bold"><i class="fa fa-info-circle me-1"></i>Awaiting Closing</small>
+                        @elseif($variance > 0)
                             <h2 class="text-success mb-0 font-w800" style="font-size: 32px;">+₱ {{ number_format($variance, 2) }}</h2>
                             <small class="text-success fw-bold"><i class="fa fa-caret-up me-1"></i>Over (Cash Excess)</small>
                         @elseif($variance < 0)
@@ -398,10 +431,22 @@
                 @csrf
                 <input type="hidden" name="shift" value="opening">
                 <div class="modal-body p-4">
+                    @php
+                        $currentLoggedNurse = '';
+                        if (session()->has('active_nurse_id')) {
+                            $activeNurseUser = \App\Models\User::find(session('active_nurse_id'));
+                            if ($activeNurseUser) {
+                                $currentLoggedNurse = $activeNurseUser->name;
+                            }
+                        }
+                        if (empty($currentLoggedNurse)) {
+                            $currentLoggedNurse = auth()->user()->name ?? (auth()->user()->first_name . ' ' . auth()->user()->last_name);
+                        }
+                    @endphp
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY</label>
-                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #f8fafc; border-radius: 10px;" value="{{ ($openingTally && isset($openingTally->nurse_on_duty)) ? $openingTally->nurse_on_duty : auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
+                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY (CURRENTLY LOGGED IN)</label>
+                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #e2e8f0; border-radius: 10px; font-weight: 600;" value="{{ $currentLoggedNurse }}" readonly>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -414,19 +459,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    $denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 1];
-                                @endphp
-                                @foreach ($denominations as $denom)
+                                @foreach ($denominations as $key => $denom)
                                     @php
-                                        $qty = $openingTally ? ($openingTally->{'denom_' . $denom} ?? 0) : 0;
+                                        $qty = $openingTally ? ($openingTally->{$key} ?? 0) : 0;
                                     @endphp
                                     <tr>
-                                        <td class="align-middle fw-bold text-muted">₱ {{ number_format($denom) }}</td>
+                                        <td class="align-middle fw-bold text-muted">{{ $denom['label'] }}</td>
                                         <td>
-                                            <input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
+                                            <input type="number" name="{{ $key }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
                                         </td>
-                                        <td class="align-middle row-total fw-bold text-primary">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                        <td class="align-middle row-total fw-bold text-primary">₱ {{ number_format($denom['val'] * $qty, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -465,10 +507,22 @@
                 @csrf
                 <input type="hidden" name="shift" value="closing">
                 <div class="modal-body p-4">
+                    @php
+                        $currentLoggedNurse = '';
+                        if (session()->has('active_nurse_id')) {
+                            $activeNurseUser = \App\Models\User::find(session('active_nurse_id'));
+                            if ($activeNurseUser) {
+                                $currentLoggedNurse = $activeNurseUser->name;
+                            }
+                        }
+                        if (empty($currentLoggedNurse)) {
+                            $currentLoggedNurse = auth()->user()->name ?? (auth()->user()->first_name . ' ' . auth()->user()->last_name);
+                        }
+                    @endphp
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY</label>
-                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #f8fafc; border-radius: 10px;" value="{{ ($closingTally && isset($closingTally->nurse_on_duty)) ? $closingTally->nurse_on_duty : auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
+                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY (CURRENTLY LOGGED IN)</label>
+                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #e2e8f0; border-radius: 10px; font-weight: 600;" value="{{ $currentLoggedNurse }}" readonly>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -481,16 +535,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($denominations as $denom)
+                                @foreach ($denominations as $key => $denom)
                                     @php
-                                        $qty = $closingTally ? ($closingTally->{'denom_' . $denom} ?? 0) : 0;
+                                        $qty = $closingTally ? ($closingTally->{$key} ?? 0) : 0;
                                     @endphp
                                     <tr>
-                                        <td class="align-middle fw-bold text-muted">₱ {{ number_format($denom) }}</td>
+                                        <td class="align-middle fw-bold text-muted">{{ $denom['label'] }}</td>
                                         <td>
-                                            <input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
+                                            <input type="number" name="{{ $key }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
                                         </td>
-                                        <td class="align-middle row-total fw-bold text-danger">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                        <td class="align-middle row-total fw-bold text-danger">₱ {{ number_format($denom['val'] * $qty, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

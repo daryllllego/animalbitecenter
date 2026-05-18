@@ -22,6 +22,7 @@ class CashRecord extends Model
         'denom_100',
         'denom_50',
         'denom_20',
+        'coin_20',
         'denom_10',
         'denom_5',
         'denom_1',

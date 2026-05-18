@@ -51,6 +51,20 @@
 @endpush
 
 @section('content')
+@php
+    $denominations = [
+        'denom_1000' => ['val' => 1000, 'label' => '₱ 1,000 Bill'],
+        'denom_500' => ['val' => 500, 'label' => '₱ 500 Bill'],
+        'denom_200' => ['val' => 200, 'label' => '₱ 200 Bill'],
+        'denom_100' => ['val' => 100, 'label' => '₱ 100 Bill'],
+        'denom_50' => ['val' => 50, 'label' => '₱ 50 Bill'],
+        'denom_20' => ['val' => 20, 'label' => '₱ 20 Bill'],
+        'coin_20' => ['val' => 20, 'label' => '₱ 20 Coin'],
+        'denom_10' => ['val' => 10, 'label' => '₱ 10 Coin'],
+        'denom_5' => ['val' => 5, 'label' => '₱ 5 Coin'],
+        'denom_1' => ['val' => 1, 'label' => '₱ 1 Coin'],
+    ];
+@endphp
 
 
 <div class="row">
@@ -90,19 +104,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php
-                                            $denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 1];
-                                        @endphp
-                                        @foreach ($denominations as $denom)
+                                        @foreach ($denominations as $key => $denom)
                                             @php
-                                                $qty = $opening ? $opening->{'denom_' . $denom} : 0;
+                                                $qty = $opening ? ($opening->{$key} ?? 0) : 0;
                                             @endphp
                                             <tr>
-                                                <td class="align-middle">₱ {{ number_format($denom) }}</td>
-                                                <td><input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px;" value="{{ $qty }}"></td>
-                                                <td class="align-middle row-total">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                                <td class="align-middle fw-bold text-muted">{{ $denom['label'] }}</td>
+                                                <td><input type="number" name="{{ $key }}" class="form-control text-center mx-auto" style="width: 100px;" value="{{ $qty }}"></td>
+                                                <td class="align-middle row-total">₱ {{ number_format($denom['val'] * $qty, 2) }}</td>
                                                 @if ($loop->first)
-                                                    <td rowspan="9" class="p-0">
+                                                    <td rowspan="10" class="p-0">
                                                         <textarea name="remarks" class="form-control border-0 h-100" style="min-height: 400px;" placeholder="Remarks or Time log...">{{ $opening->remarks ?? '' }}</textarea>
                                                     </td>
                                                 @endif
@@ -152,16 +163,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($denominations as $denom)
+                                        @foreach ($denominations as $key => $denom)
                                             @php
-                                                $qty = $closing ? $closing->{'denom_' . $denom} : 0;
+                                                $qty = $closing ? ($closing->{$key} ?? 0) : 0;
                                             @endphp
                                             <tr>
-                                                <td class="align-middle">₱ {{ number_format($denom) }}</td>
-                                                <td><input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px;" value="{{ $qty }}"></td>
-                                                <td class="align-middle row-total">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                                <td class="align-middle fw-bold text-muted">{{ $denom['label'] }}</td>
+                                                <td><input type="number" name="{{ $key }}" class="form-control text-center mx-auto" style="width: 100px;" value="{{ $qty }}"></td>
+                                                <td class="align-middle row-total">₱ {{ number_format($denom['val'] * $qty, 2) }}</td>
                                                 @if ($loop->first)
-                                                    <td rowspan="9" class="p-0">
+                                                    <td rowspan="10" class="p-0">
                                                         <textarea name="remarks" class="form-control border-0 h-100" style="min-height: 400px;" placeholder="Remarks or Time log...">{{ $closing->remarks ?? '' }}</textarea>
                                                     </td>
                                                 @endif
