@@ -34,7 +34,7 @@ class AnimalBiteController extends Controller
     public function dashboard()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
-        $selectedBranch = session('selected_branch', 'All Branches');
+        $selectedBranch = auth()->user()->is_super_admin ? session('selected_branch', 'All Branches') : auth()->user()->branch;
         
         // Automated opening cash calculation:
         $historicalSales = MasterlistEntry::where('created_at', '<', $date)
@@ -50,16 +50,28 @@ class AnimalBiteController extends Controller
         $defaultOpeningCash = $historicalSales - $historicalDeductions;
 
         if ($selectedBranch !== 'All Branches') {
-            // For a specific branch, use/edit the DailyRecord
-            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
-            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
-                $dailyRecord->update(['opening_cash' => $defaultOpeningCash]);
+            $openingRecord = CashRecord::where('date', $date)->where('shift', 'opening')->first();
+            if ($openingRecord) {
+                $openingCash = $openingRecord->total_amount;
+            } else {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $prevClosing = CashRecord::where('date', $prevDate)->where('shift', 'closing')->first();
+                $openingCash = $prevClosing ? $prevClosing->total_amount : 0;
             }
-            $openingCash = $dailyRecord->opening_cash;
-            $isEditable = true;
+            
+            // Sync with DailyRecord for reporting compatibility
+            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date, 'branch' => $selectedBranch]);
+            if ($dailyRecord->opening_cash != $openingCash) {
+                $dailyRecord->update(['opening_cash' => $openingCash]);
+            }
+            $isEditable = false; // Set to false to remove starting cash edit modal button
         } else {
-            // For All Branches mode, show the automated sum and make it read-only
-            $openingCash = $defaultOpeningCash;
+            // For All Branches mode, sum the opening cash across all branches
+            $openingCash = CashRecord::where('date', $date)->where('shift', 'opening')->sum('total_amount');
+            if ($openingCash == 0) {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $openingCash = CashRecord::where('date', $prevDate)->where('shift', 'closing')->sum('total_amount');
+            }
             $isEditable = false;
         }
         
@@ -109,7 +121,7 @@ class AnimalBiteController extends Controller
     public function cashOnHand()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
-        $branch = session('selected_branch', 'All Branches');
+        $branch = auth()->user()->is_super_admin ? session('selected_branch', 'All Branches') : auth()->user()->branch;
         
         $opening = CashRecord::where('date', $date)->where('shift', 'opening')->first();
         $closing = CashRecord::where('date', $date)->where('shift', 'closing')->first();
@@ -128,38 +140,7 @@ class AnimalBiteController extends Controller
             }
         }
 
-        // Get Starting/Opening Cash from DailyRecord (same logic as dashboard)
-        $isEditable = false;
-        if ($branch !== 'All Branches') {
-            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
-            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
-                $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-                    ->where(function($q) {
-                        $q->where('payment_method', 'CASH')
-                          ->orWhere('payment_method', 'SPLIT');
-                    })
-                    ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
-                    
-                $historicalDeductions = Deduction::where('date', '<', $date)
-                    ->sum('amount');
-                    
-                $dailyRecord->update(['opening_cash' => $historicalSales - $historicalDeductions]);
-            }
-            $openingCash = $dailyRecord->opening_cash;
-            $isEditable = true;
-        } else {
-            $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-                ->where(function($q) {
-                    $q->where('payment_method', 'CASH')
-                      ->orWhere('payment_method', 'SPLIT');
-                })
-                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
-                
-            $historicalDeductions = Deduction::where('date', '<', $date)
-                ->sum('amount');
-                
-            $openingCash = $historicalSales - $historicalDeductions;
-        }
+        $openingCash = $opening ? $opening->total_amount : 0;
 
         return view('animalbite.cash-on-hand', [
             'title' => 'Cash on Hand - Animal Bite Center',
@@ -168,7 +149,7 @@ class AnimalBiteController extends Controller
             'opening' => $opening,
             'closing' => $closing,
             'openingCash' => $openingCash,
-            'isEditable' => $isEditable,
+            'isEditable' => false,
             'selectedDate' => $date
         ]);
     }
@@ -179,23 +160,40 @@ class AnimalBiteController extends Controller
         $validated = $request->validate([
             'shift' => 'required|in:opening,closing',
             'nurse_on_duty' => 'nullable|string',
-            'denom_1000' => 'integer|min:0',
-            'denom_500' => 'integer|min:0',
-            'denom_200' => 'integer|min:0',
-            'denom_100' => 'integer|min:0',
-            'denom_50' => 'integer|min:0',
-            'denom_20' => 'integer|min:0',
-            'denom_10' => 'integer|min:0',
-            'denom_5' => 'integer|min:0',
-            'denom_1' => 'integer|min:0',
+            'denom_1000' => 'nullable|integer|min:0',
+            'denom_500' => 'nullable|integer|min:0',
+            'denom_200' => 'nullable|integer|min:0',
+            'denom_100' => 'nullable|integer|min:0',
+            'denom_50' => 'nullable|integer|min:0',
+            'denom_20' => 'nullable|integer|min:0',
+            'denom_10' => 'nullable|integer|min:0',
+            'denom_5' => 'nullable|integer|min:0',
+            'denom_1' => 'nullable|integer|min:0',
             'remarks' => 'nullable|string',
             'total_amount' => 'required|numeric',
         ]);
 
-        CashRecord::updateOrCreate(
-            ['date' => $date, 'shift' => $validated['shift']],
+        $branch = auth()->user()->is_super_admin ? session('selected_branch', 'All Branches') : auth()->user()->branch;
+        if ($branch === 'All Branches') {
+            $branch = 'Mandaue Branch'; // Fallback
+        }
+        $validated['branch'] = $branch;
+
+        // Default any null inputs to 0
+        foreach ([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom) {
+            $validated['denom_' . $denom] = $validated['denom_' . $denom] ?? 0;
+        }
+
+        $cashRecord = CashRecord::updateOrCreate(
+            ['date' => $date, 'shift' => $validated['shift'], 'branch' => $branch],
             $validated
         );
+
+        // Sync with DailyRecord for reporting compatibility
+        if ($validated['shift'] === 'opening') {
+            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date, 'branch' => $branch]);
+            $dailyRecord->update(['opening_cash' => $cashRecord->total_amount]);
+        }
 
         return redirect()->back()->with('success', 'Cash record saved successfully!');
     }
@@ -203,36 +201,23 @@ class AnimalBiteController extends Controller
     public function cashTracking()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
-        $branch = session('selected_branch', 'All Branches');
+        $branch = auth()->user()->is_super_admin ? session('selected_branch', 'All Branches') : auth()->user()->branch;
         
         if ($branch !== 'All Branches') {
-            $dailyRecord = DailyRecord::firstOrCreate(['date' => $date]);
-            if ($dailyRecord->wasRecentlyCreated && $dailyRecord->opening_cash == 0) {
-                $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-                    ->where(function($q) {
-                        $q->where('payment_method', 'CASH')
-                          ->orWhere('payment_method', 'SPLIT');
-                    })
-                    ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
-                    
-                $historicalDeductions = Deduction::where('date', '<', $date)
-                    ->sum('amount');
-                    
-                $dailyRecord->update(['opening_cash' => $historicalSales - $historicalDeductions]);
+            $openingRecord = CashRecord::where('date', $date)->where('shift', 'opening')->first();
+            if ($openingRecord) {
+                $openingAmount = $openingRecord->total_amount;
+            } else {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $prevClosing = CashRecord::where('date', $prevDate)->where('shift', 'closing')->first();
+                $openingAmount = $prevClosing ? $prevClosing->total_amount : 0;
             }
-            $openingAmount = $dailyRecord->opening_cash;
         } else {
-            $historicalSales = MasterlistEntry::where('created_at', '<', $date)
-                ->where(function($q) {
-                    $q->where('payment_method', 'CASH')
-                      ->orWhere('payment_method', 'SPLIT');
-                })
-                ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
-                
-            $historicalDeductions = Deduction::where('date', '<', $date)
-                ->sum('amount');
-                
-            $openingAmount = $historicalSales - $historicalDeductions;
+            $openingAmount = CashRecord::where('date', $date)->where('shift', 'opening')->sum('total_amount');
+            if ($openingAmount == 0) {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $openingAmount = CashRecord::where('date', $prevDate)->where('shift', 'closing')->sum('total_amount');
+            }
         }
         
         // Today's Totals
@@ -254,38 +239,75 @@ class AnimalBiteController extends Controller
             
         $expectedCash = ($openingAmount + $totalCashSales) - $totalDeductions;
         
-        // For automated tracking, Closing is the same as Expected
-        $closingAmount = $expectedCash;
-        $variance = 0;
+        if ($branch === 'All Branches') {
+            $closingAmount = CashRecord::where('date', $date)->where('shift', 'closing')->sum('total_amount');
+            $hasClosing = CashRecord::where('date', $date)->where('shift', 'closing')->exists();
+            $closingAmountDisplay = $hasClosing ? $closingAmount : null;
+        } else {
+            $closingRecord = CashRecord::where('date', $date)->where('shift', 'closing')->first();
+            $closingAmountDisplay = $closingRecord ? $closingRecord->total_amount : null;
+        }
 
-        $salesTally = MasterlistEntry::whereDate('created_at', $date)
-            ->when($branch !== 'All Branches', function($q) use ($branch) {
-                return $q->where('branch', $branch);
-            })
-            ->selectRaw('SUM(denom_1000) as d1000, SUM(denom_500) as d500, SUM(denom_200) as d200, SUM(denom_100) as d100, SUM(denom_50) as d50, SUM(denom_20) as d20, SUM(coin_20) as c20, SUM(coin_10) as c10, SUM(coin_5) as c5, SUM(coin_1) as c1')
-            ->first();
+        $variance = $closingAmountDisplay !== null ? ($closingAmountDisplay - $expectedCash) : 0;
 
-        $deductionTally = Deduction::whereDate('date', $date)
-            ->when($branch !== 'All Branches', function($q) use ($branch) {
-                return $q->where('branch', $branch);
-            })
-            ->selectRaw('SUM(denom_1000) as d1000, SUM(denom_500) as d500, SUM(denom_200) as d200, SUM(denom_100) as d100, SUM(denom_50) as d50, SUM(denom_20) as d20, SUM(coin_20) as c20, SUM(coin_10) as c10, SUM(coin_5) as c5, SUM(coin_1) as c1')
-            ->first();
+        // Get actual opening and closing records to display their denominations
+        if ($branch !== 'All Branches') {
+            $openingTallyRecord = CashRecord::where('date', $date)->where('shift', 'opening')->first();
+            $closingTallyRecord = CashRecord::where('date', $date)->where('shift', 'closing')->first();
+            
+            // Carry-over for opening tally if it doesn't exist
+            if (!$openingTallyRecord) {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $openingTallyRecord = CashRecord::where('date', $prevDate)->where('shift', 'closing')->first();
+            }
+        } else {
+            // For All Branches, we can sum them up to show a consolidated tally
+            $openingTallies = CashRecord::where('date', $date)->where('shift', 'opening')->get();
+            if ($openingTallies->isEmpty()) {
+                $prevDate = Carbon::parse($date)->subDay()->toDateString();
+                $openingTallies = CashRecord::where('date', $prevDate)->where('shift', 'closing')->get();
+            }
+            
+            $closingTallies = CashRecord::where('date', $date)->where('shift', 'closing')->get();
+            
+            // Consolidate
+            $openingTallyRecord = (object)[
+                'denom_1000' => $openingTallies->sum('denom_1000'),
+                'denom_500' => $openingTallies->sum('denom_500'),
+                'denom_200' => $openingTallies->sum('denom_200'),
+                'denom_100' => $openingTallies->sum('denom_100'),
+                'denom_50' => $openingTallies->sum('denom_50'),
+                'denom_20' => $openingTallies->sum('denom_20'),
+                'denom_10' => $openingTallies->sum('denom_10'),
+                'denom_5' => $openingTallies->sum('denom_5'),
+                'denom_1' => $openingTallies->sum('denom_1'),
+            ];
+            
+            $closingTallyRecord = (object)[
+                'denom_1000' => $closingTallies->sum('denom_1000'),
+                'denom_500' => $closingTallies->sum('denom_500'),
+                'denom_200' => $closingTallies->sum('denom_200'),
+                'denom_100' => $closingTallies->sum('denom_100'),
+                'denom_50' => $closingTallies->sum('denom_50'),
+                'denom_20' => $closingTallies->sum('denom_20'),
+                'denom_10' => $closingTallies->sum('denom_10'),
+                'denom_5' => $closingTallies->sum('denom_5'),
+                'denom_1' => $closingTallies->sum('denom_1'),
+            ];
+        }
 
-        $tally = (object)[
-            'd1000' => ($salesTally->d1000 ?? 0) - ($deductionTally->d1000 ?? 0),
-            'd500' => ($salesTally->d500 ?? 0) - ($deductionTally->d500 ?? 0),
-            'd200' => ($salesTally->d200 ?? 0) - ($deductionTally->d200 ?? 0),
-            'd100' => ($salesTally->d100 ?? 0) - ($deductionTally->d100 ?? 0),
-            'd50' => ($salesTally->d50 ?? 0) - ($deductionTally->d50 ?? 0),
-            'd20' => ($salesTally->d20 ?? 0) - ($deductionTally->d20 ?? 0),
-            'c20' => ($salesTally->c20 ?? 0) - ($deductionTally->c20 ?? 0),
-            'c10' => ($salesTally->c10 ?? 0) - ($deductionTally->c10 ?? 0),
-            'c5' => ($salesTally->c5 ?? 0) - ($deductionTally->c5 ?? 0),
-            'c1' => ($salesTally->c1 ?? 0) - ($deductionTally->c1 ?? 0),
-        ];
-
-        $isEditable = ($branch !== 'All Branches');
+        if (!$openingTallyRecord) {
+            $openingTallyRecord = (object)[
+                'denom_1000' => 0, 'denom_500' => 0, 'denom_200' => 0, 'denom_100' => 0,
+                'denom_50' => 0, 'denom_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
+            ];
+        }
+        if (!$closingTallyRecord) {
+            $closingTallyRecord = (object)[
+                'denom_1000' => 0, 'denom_500' => 0, 'denom_200' => 0, 'denom_100' => 0,
+                'denom_50' => 0, 'denom_20' => 0, 'denom_10' => 0, 'denom_5' => 0, 'denom_1' => 0
+            ];
+        }
 
         return view('animalbite.cash-tracking', [
             'title' => 'Cash on Hand - Animal Bite Center',
@@ -296,11 +318,13 @@ class AnimalBiteController extends Controller
             'totalCashSales' => $totalCashSales,
             'totalDeductions' => $totalDeductions,
             'expectedCash' => $expectedCash,
-            'closingAmount' => $closingAmount,
+            'closingAmount' => $closingAmountDisplay,
             'variance' => $variance,
             'selectedDate' => $date,
-            'tally' => $tally,
-            'isEditable' => $isEditable
+            'openingTally' => $openingTallyRecord,
+            'closingTally' => $closingTallyRecord,
+            'selectedBranch' => $branch,
+            'isEditable' => false
         ]);
     }
 
@@ -383,26 +407,10 @@ class AnimalBiteController extends Controller
             'cash_amount' => 'nullable|numeric',
             'online_amount' => 'nullable|numeric',
             'online_payment_method' => 'nullable|string',
-            'denom_1000' => 'nullable|integer|min:0',
-            'denom_500' => 'nullable|integer|min:0',
-            'denom_200' => 'nullable|integer|min:0',
-            'denom_100' => 'nullable|integer|min:0',
-            'denom_50' => 'nullable|integer|min:0',
-            'denom_20' => 'nullable|integer|min:0',
-            'coin_20' => 'nullable|integer|min:0',
-            'coin_10' => 'nullable|integer|min:0',
-            'coin_5' => 'nullable|integer|min:0',
-            'coin_1' => 'nullable|integer|min:0',
         ]);
 
         $validated['is_discounted'] = $request->has('is_discounted');
         $validated['is_split_payment'] = $request->has('is_split_payment');
-
-        // Ensure denominations are integers and default to 0 if null
-        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
-        foreach ($denoms as $denom) {
-            $validated[$denom] = $validated[$denom] ?? 0;
-        }
 
         if ($validated['is_split_payment']) {
             $validated['payment_method'] = 'SPLIT';
@@ -442,29 +450,9 @@ class AnimalBiteController extends Controller
             'cash_amount' => 'nullable|numeric',
             'online_amount' => 'nullable|numeric',
             'online_payment_method' => 'nullable|string',
-            'denom_1000' => 'nullable|integer|min:0',
-            'denom_500' => 'nullable|integer|min:0',
-            'denom_200' => 'nullable|integer|min:0',
-            'denom_100' => 'nullable|integer|min:0',
-            'denom_50' => 'nullable|integer|min:0',
-            'denom_20' => 'nullable|integer|min:0',
-            'coin_20' => 'nullable|integer|min:0',
-            'coin_10' => 'nullable|integer|min:0',
-            'coin_5' => 'nullable|integer|min:0',
-            'coin_1' => 'nullable|integer|min:0',
         ];
 
-        // Ensure denominations are integers and default to 0 if null
-        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
-        foreach ($denoms as $denom) {
-            $rules[$denom] = 'nullable|integer|min:0';
-        }
-
         $validated = $request->validate($rules);
-
-        foreach ($denoms as $denom) {
-            $validated[$denom] = $validated[$denom] ?? 0;
-        }
         $validated['is_discounted'] = $request->has('is_discounted');
         $validated['is_split_payment'] = $request->has('is_split_payment');
 
@@ -566,11 +554,6 @@ class AnimalBiteController extends Controller
             'branch' => $branch
         ];
 
-        // Handle denominations
-        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
-        foreach ($denoms as $denom) {
-            $data[$denom] = $request->input($denom) ?: 0;
-        }
 
         Deduction::create($data);
 
@@ -588,13 +571,7 @@ class AnimalBiteController extends Controller
 
         $data = $validated;
         
-        // Handle denominations
-        $denoms = ['denom_1000', 'denom_500', 'denom_200', 'denom_100', 'denom_50', 'denom_20', 'coin_20', 'coin_10', 'coin_5', 'coin_1'];
-        foreach ($denoms as $denom) {
-            if ($request->has($denom)) {
-                $data[$denom] = $request->input($denom) ?: 0;
-            }
-        }
+
 
         $deduction->update($data);
 

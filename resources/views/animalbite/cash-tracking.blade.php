@@ -85,84 +85,119 @@
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm border-start border-primary border-4" style="background-color: #e3f2fd; border-radius: 12px; border: none;">
-            <div class="card-body d-flex justify-content-between align-items-center py-3">
-                <div>
-                    <h5 class="text-primary font-weight-bold mb-0" style="letter-spacing: 0.5px; font-weight: 700;">Daily Starting Opening Cash</h5>
-                    <p class="text-muted small mb-0">The initial cash float balance for today</p>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="h4 text-primary font-weight-bold mb-0 me-3" style="font-size: 22px; font-weight: 800;">₱ {{ number_format($openingAmount, 2) }}</span>
-                    @if($isEditable)
-                        <button class="btn btn-primary btn-sm rounded shadow-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#editStartingCashModal" style="border-radius: 8px; font-weight: 600;">
-                            <i class="fa fa-edit me-1"></i>Edit Starting Cash
-                        </button>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <div class="row g-2">
-    <div class="col-xl-3 col-sm-6 mb-2">
-        <div class="card tracking-card">
+    <!-- Opening Cash -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
-                    <div class="tracking-icon bg-soft-primary mb-0 me-3" style="width: 40px; height: 40px;">
-                        <i class="fa fa-door-open"></i>
+                    <div class="tracking-icon bg-soft-primary mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="fa fa-door-open" style="font-size: 14px;"></i>
                     </div>
                     <div>
-                        <div class="tracking-title mb-0" style="font-size: 10px;">Opening</div>
-                        <div class="tracking-value text-primary" style="font-size: 18px;">₱ {{ number_format($openingAmount, 2) }}</div>
+                        <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Opening</div>
+                        <div class="tracking-value text-primary" style="font-size: 15px;">₱{{ number_format($openingAmount, 2) }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6 mb-2">
-        <div class="card tracking-card">
+    <!-- Cash Sales -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
-                    <div class="tracking-icon bg-soft-success mb-0 me-3" style="width: 40px; height: 40px;">
-                        <i class="fa fa-plus-circle"></i>
+                    <div class="tracking-icon bg-soft-success mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="fa fa-plus-circle" style="font-size: 14px;"></i>
                     </div>
                     <div>
-                        <div class="tracking-title mb-0" style="font-size: 10px;">Sales</div>
-                        <div class="tracking-value text-success" style="font-size: 18px;">₱ {{ number_format($totalCashSales, 2) }}</div>
+                        <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Sales</div>
+                        <div class="tracking-value text-success" style="font-size: 15px;">₱{{ number_format($totalCashSales, 2) }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6 mb-2">
-        <div class="card tracking-card">
+    <!-- Deductions -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
-                    <div class="tracking-icon bg-soft-danger mb-0 me-3" style="width: 40px; height: 40px;">
-                        <i class="fa fa-minus-circle"></i>
+                    <div class="tracking-icon bg-soft-danger mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="fa fa-minus-circle" style="font-size: 14px;"></i>
                     </div>
                     <div>
-                        <div class="tracking-title mb-0" style="font-size: 10px;">Deductions</div>
-                        <div class="tracking-value text-danger" style="font-size: 18px;">₱ {{ number_format($totalDeductions, 2) }}</div>
+                        <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Deductions</div>
+                        <div class="tracking-value text-danger" style="font-size: 15px;">₱{{ number_format($totalDeductions, 2) }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6 mb-2">
-        <div class="card tracking-card">
+    <!-- Expected Closing -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
-                    <div class="tracking-icon bg-soft-warning mb-0 me-3" style="width: 40px; height: 40px;">
-                        <i class="fa fa-equals"></i>
+                    <div class="tracking-icon bg-soft-warning mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="fa fa-equals" style="font-size: 14px;"></i>
                     </div>
                     <div>
-                        <div class="tracking-title mb-0" style="font-size: 10px;">Expected</div>
-                        <div class="tracking-value text-warning" style="font-size: 18px;">₱ {{ number_format($expectedCash, 2) }}</div>
+                        <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Expected</div>
+                        <div class="tracking-value text-warning" style="font-size: 15px;">₱{{ number_format($expectedCash, 2) }}</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Actual Closing -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="tracking-icon bg-soft-info mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="fa fa-door-closed" style="font-size: 14px;"></i>
+                    </div>
+                    <div>
+                        <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Actual Cash</div>
+                        <div class="tracking-value text-info" style="font-size: 15px;">₱{{ number_format($closingAmount, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Variance -->
+    <div class="col-xl-2 col-sm-4 col-6 mb-2">
+        <div class="card tracking-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    @if($variance > 0)
+                        <div class="tracking-icon bg-soft-success mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                            <i class="fa fa-caret-up" style="font-size: 16px;"></i>
+                        </div>
+                        <div>
+                            <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Over (Variance)</div>
+                            <div class="tracking-value text-success" style="font-size: 15px;">+₱{{ number_format($variance, 2) }}</div>
+                        </div>
+                    @elseif($variance < 0)
+                        <div class="tracking-icon bg-soft-danger mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                            <i class="fa fa-caret-down" style="font-size: 16px;"></i>
+                        </div>
+                        <div>
+                            <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Short (Variance)</div>
+                            <div class="tracking-value text-danger" style="font-size: 15px;">₱{{ number_format($variance, 2) }}</div>
+                        </div>
+                    @else
+                        <div class="tracking-icon bg-soft-info mb-0 me-2" style="width: 35px; height: 35px; min-width: 35px;">
+                            <i class="fa fa-check-circle" style="font-size: 14px;"></i>
+                        </div>
+                        <div>
+                            <div class="tracking-title mb-0" style="font-size: 9px; letter-spacing: 0.5px;">Balanced</div>
+                            <div class="tracking-value text-dark" style="font-size: 15px;">₱0.00</div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -171,7 +206,76 @@
 
 <div class="row mt-4">
     <div class="col-lg-8">
-        <div class="card tracking-card mb-4">
+        <!-- Yellow Box: Daily Cash Tally -->
+        <div class="card tracking-card mb-4" style="border-top: 4px solid #ffc107; height: auto !important; flex: none !important;">
+            <div class="card-body p-4">
+                <h5 class="font-w700 text-dark mb-4" style="font-size: 14px; letter-spacing: 1px;">
+                    <i class="fa fa-list-ul text-warning me-2"></i>CASH DENOMINATION BREAKDOWN
+                </h5>
+                <div class="row">
+                    <!-- Left: Opening Tally -->
+                    <div class="col-md-6 border-end">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <h6 class="font-w700 text-primary mb-0"><i class="fa fa-door-open me-2"></i>OPENING CASH COUNT</h6>
+                                @if($selectedBranch !== 'All Branches')
+                                    <button class="btn btn-xs btn-outline-primary btn-rounded py-0 px-2 ms-2" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#editOpeningModal">
+                                        <i class="fa fa-edit me-1"></i>Edit
+                                    </button>
+                                @endif
+                            </div>
+                            <span class="badge bg-soft-primary px-3 py-1 rounded">Total: ₱{{ number_format($openingAmount, 2) }}</span>
+                        </div>
+                        <div class="pe-md-3">
+                            @foreach([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom)
+                                @php
+                                    $qty = $openingTally ? $openingTally->{'denom_' . $denom} : 0;
+                                @endphp
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted fw-bold">₱ {{ number_format($denom) }}</span>
+                                    <div class="text-end">
+                                        <span class="font-w800 text-primary h6 mb-0">{{ number_format($qty) }}</span>
+                                        <small class="text-muted ms-1">pcs</small>
+                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom * $qty) }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <!-- Right: Closing Tally -->
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center mb-3 ps-md-3">
+                            <div class="d-flex align-items-center">
+                                <h6 class="font-w700 text-danger mb-0"><i class="fa fa-door-closed me-2"></i>CLOSING CASH COUNT</h6>
+                                @if($selectedBranch !== 'All Branches')
+                                    <button class="btn btn-xs btn-outline-danger btn-rounded py-0 px-2 ms-2" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#editClosingModal">
+                                        <i class="fa fa-edit me-1"></i>Edit
+                                    </button>
+                                @endif
+                            </div>
+                            <span class="badge bg-soft-danger px-3 py-1 rounded">Total: ₱{{ number_format($closingAmount, 2) }}</span>
+                        </div>
+                        <div class="ps-md-3">
+                            @foreach([1000, 500, 200, 100, 50, 20, 10, 5, 1] as $denom)
+                                @php
+                                    $qty = $closingTally ? $closingTally->{'denom_' . $denom} : 0;
+                                @endphp
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted fw-bold">₱ {{ number_format($denom) }}</span>
+                                    <div class="text-end">
+                                        <span class="font-w800 text-danger h6 mb-0">{{ number_format($qty) }}</span>
+                                        <small class="text-muted ms-1">pcs</small>
+                                        <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">₱ {{ number_format($denom * $qty) }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card tracking-card" style="height: auto !important; flex: none !important;">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="mb-0 font-w700">DETAILED CASH FLOW</h5>
             </div>
@@ -215,51 +319,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- Yellow Box: Daily Cash Tally -->
-        <div class="card tracking-card" style="border-top: 4px solid #ffc107;">
-            <div class="card-body p-4">
-                <h5 class="font-w700 text-dark mb-4" style="font-size: 14px; letter-spacing: 1px;">
-                    <i class="fa fa-list-ul text-warning me-2"></i>CASH DENOMINATION BREAKDOWN
-                </h5>
-                <div class="row g-4">
-                    @php
-                        $allDenoms = [
-                            ['label' => '₱ 1,000s', 'value' => $tally->d1000 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 500s', 'value' => $tally->d500 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 200s', 'value' => $tally->d200 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 100s', 'value' => $tally->d100 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 50s', 'value' => $tally->d50 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 20 (Bill)', 'value' => $tally->d20 ?? 0, 'color' => 'primary'],
-                            ['label' => '₱ 20 (Coin)', 'value' => $tally->c20 ?? 0, 'color' => 'success'],
-                            ['label' => '₱ 10s', 'value' => $tally->c10 ?? 0, 'color' => 'success'],
-                            ['label' => '₱ 5s', 'value' => $tally->c5 ?? 0, 'color' => 'success'],
-                            ['label' => '₱ 1s', 'value' => $tally->c1 ?? 0, 'color' => 'success'],
-                        ];
-                        $chunks = array_chunk($allDenoms, 4); // 4 items per column
-                    @endphp
-                    
-                    @foreach($chunks as $chunk)
-                    <div class="col-md-4">
-                        <div class="denomination-list">
-                            @foreach($chunk as $d)
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                <span class="text-muted fw-bold">{{ $d['label'] }}</span>
-                                <div class="text-end">
-                                    <span class="font-w800 text-{{ $d['color'] }} h5 mb-0">{{ number_format($d['value']) }}</span>
-                                    <small class="text-muted ms-1">pcs</small>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card tracking-card bg-primary text-white overflow-hidden mb-3 shadow-lg">
+    <div class="col-lg-4 align-self-start">
+        <div class="card tracking-card bg-primary text-white overflow-hidden mb-3 shadow-lg" style="height: auto !important; flex: none !important;">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="text-white mb-0 font-w700" style="letter-spacing: 1px;">DAILY SUMMARY</h5>
@@ -275,69 +337,213 @@
                 
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-end">
-                        <span class="text-white-50 small fw-bold">TOTAL SALES</span>
+                        <span class="text-white-50 small fw-bold">TOTAL CASH SALES</span>
                         <h4 class="text-white mb-0 font-w700 text-success">+ ₱ {{ number_format($totalCashSales, 2) }}</h4>
                     </div>
                 </div>
                 
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-end">
-                        <span class="text-white-50 small fw-bold">DEDUCTIONS</span>
+                        <span class="text-white-50 small fw-bold">TOTAL DEDUCTIONS</span>
                         <h4 class="text-white mb-0 font-w700 text-danger">- ₱ {{ number_format($totalDeductions, 2) }}</h4>
                     </div>
                 </div>
                 
                 <hr style="background: rgba(255,255,255,0.3); height: 2px;" class="my-4">
                 
-                <div class="p-3 rounded bg-white-10" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-end">
+                        <span class="text-white-50 small fw-bold">EXPECTED CLOSING</span>
+                        <h4 class="text-white mb-0 font-w700">₱ {{ number_format($expectedCash, 2) }}</h4>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-end">
+                        <span class="text-white-50 small fw-bold">ACTUAL CLOSING</span>
+                        <h4 class="text-white mb-0 font-w700">₱ {{ number_format($closingAmount, 2) }}</h4>
+                    </div>
+                </div>
+                
+                <div class="p-3 rounded mt-4" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
                     <div class="text-center">
-                        <span class="text-white-50 small fw-bold d-block mb-1">PROJECTED CLOSING CASH</span>
-                        <h2 class="text-white mb-0 font-w800" style="font-size: 32px;">₱ {{ number_format($expectedCash, 2) }}</h2>
+                        <span class="text-white-50 small fw-bold d-block mb-1">VARIANCE TALLY</span>
+                        @if($variance > 0)
+                            <h2 class="text-success mb-0 font-w800" style="font-size: 32px;">+₱ {{ number_format($variance, 2) }}</h2>
+                            <small class="text-success fw-bold"><i class="fa fa-caret-up me-1"></i>Over (Cash Excess)</small>
+                        @elseif($variance < 0)
+                            <h2 class="text-danger mb-0 font-w800" style="font-size: 32px;">₱ {{ number_format($variance, 2) }}</h2>
+                            <small class="text-danger fw-bold"><i class="fa fa-caret-down me-1"></i>Short (Cash Deficit)</small>
+                        @else
+                            <h2 class="text-white mb-0 font-w800" style="font-size: 32px;">₱ 0.00</h2>
+                            <small class="text-white-50 fw-bold"><i class="fa fa-check-circle me-1"></i>Balanced</small>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        
-        
-        <div class="card tracking-card mt-4">
-            <div class="card-body text-center p-4">
-                <div class="tracking-icon bg-soft-info mx-auto">
-                    <i class="fa fa-sync"></i>
-                </div>
-                <h5 class="font-w600">Automated Carry-over</h5>
-                <p class="text-muted small">This system automatically calculates your cash flow based on Masterlist entries and Deductions. Your closing balance today will be your opening balance tomorrow.</p>
+@if($selectedBranch !== 'All Branches')
+<!-- Edit Opening Modal -->
+<div class="modal fade" id="editOpeningModal" tabindex="-1" aria-labelledby="editOpeningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0" style="border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header bg-primary text-white border-0" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                <h5 class="modal-title font-w700 text-white" id="editOpeningModalLabel"><i class="fa fa-edit me-2"></i>EDIT OPENING DENOMINATIONS</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-<!-- Edit Starting Cash Modal -->
-@if($isEditable)
-<div class="modal fade" id="editStartingCashModal" tabindex="-1" aria-labelledby="editStartingCashModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-primary font-weight-bold" id="editStartingCashModalLabel" style="font-size: 18px; letter-spacing: 0.5px;">EDIT DAILY STARTING CASH</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('animal-bite.update-opening-cash') }}" method="POST">
+            <form action="{{ route('animal-bite.cash-on-hand.store') }}" method="POST">
                 @csrf
-                <div class="modal-body py-4">
-                    <div class="form-group mb-3">
-                        <label class="font-weight-bold text-muted small mb-2">STARTING OPENING CASH AMOUNT</label>
-                        <div class="input-group" style="box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
-                            <span class="input-group-text bg-light border-end-0 text-dark font-weight-bold" style="font-size: 16px; border: 1px solid #cbd5e1;">₱</span>
-                            <input type="number" step="0.01" name="opening_cash" class="form-control border-start-0 text-dark font-weight-bold" style="font-size: 16px; height: 45px; border: 1px solid #cbd5e1;" value="{{ $openingAmount }}" required>
+                <input type="hidden" name="shift" value="opening">
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY</label>
+                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #f8fafc; border-radius: 10px;" value="{{ ($openingTally && isset($openingTally->nurse_on_duty)) ? $openingTally->nurse_on_duty : auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
                         </div>
-                        <span class="text-muted small d-block mt-2"><i class="fa fa-info-circle me-1"></i>Enter the daily cash float balance available when starting the clinic operations.</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center cash-table align-middle mb-0">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>DENOMINATION</th>
+                                    <th>QUANTITY</th>
+                                    <th>TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 1];
+                                @endphp
+                                @foreach ($denominations as $denom)
+                                    @php
+                                        $qty = $openingTally ? ($openingTally->{'denom_' . $denom} ?? 0) : 0;
+                                    @endphp
+                                    <tr>
+                                        <td class="align-middle fw-bold text-muted">₱ {{ number_format($denom) }}</td>
+                                        <td>
+                                            <input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
+                                        </td>
+                                        <td class="align-middle row-total fw-bold text-primary">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <label class="small font-weight-bold text-muted mb-1">REMARKS / TIME LOG</label>
+                        <textarea name="remarks" class="form-control" rows="3" style="border-radius: 10px;" placeholder="Add any opening shift cash count remarks here...">{{ $openingTally->remarks ?? '' }}</textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded px-4" style="border-radius: 8px;">Save Changes</button>
+                <div class="modal-footer bg-light border-0 d-flex justify-content-between p-3" style="border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                    <div>
+                        <span class="text-muted fw-bold small">GRAND TOTAL:</span>
+                        <input type="hidden" name="total_amount" class="grand-total-input" value="{{ $openingAmount ?? 0 }}">
+                        <span class="grand-total-display h4 text-primary fw-bold ms-2">₱ {{ number_format($openingAmount ?? 0, 2) }}</span>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary" style="border-radius: 10px;" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Closing Modal -->
+<div class="modal fade" id="editClosingModal" tabindex="-1" aria-labelledby="editClosingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0" style="border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header bg-danger text-white border-0" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                <h5 class="modal-title font-w700 text-white" id="editClosingModalLabel"><i class="fa fa-edit me-2"></i>EDIT CLOSING DENOMINATIONS</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('animal-bite.cash-on-hand.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="shift" value="closing">
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="small font-weight-bold text-muted mb-1">NURSE ON DUTY</label>
+                            <input type="text" name="nurse_on_duty" class="form-control" style="background-color: #f8fafc; border-radius: 10px;" value="{{ ($closingTally && isset($closingTally->nurse_on_duty)) ? $closingTally->nurse_on_duty : auth()->user()->first_name . ' ' . auth()->user()->last_name }}">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center cash-table align-middle mb-0">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>DENOMINATION</th>
+                                    <th>QUANTITY</th>
+                                    <th>TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($denominations as $denom)
+                                    @php
+                                        $qty = $closingTally ? ($closingTally->{'denom_' . $denom} ?? 0) : 0;
+                                    @endphp
+                                    <tr>
+                                        <td class="align-middle fw-bold text-muted">₱ {{ number_format($denom) }}</td>
+                                        <td>
+                                            <input type="number" name="denom_{{ $denom }}" class="form-control text-center mx-auto" style="width: 100px; border-radius: 8px;" value="{{ $qty > 0 ? $qty : '' }}" min="0" placeholder="0">
+                                        </td>
+                                        <td class="align-middle row-total fw-bold text-danger">₱ {{ number_format($denom * $qty, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <label class="small font-weight-bold text-muted mb-1">REMARKS / TIME LOG</label>
+                        <textarea name="remarks" class="form-control" rows="3" style="border-radius: 10px;" placeholder="Add any closing shift cash count remarks here...">{{ $closingTally->remarks ?? '' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0 d-flex justify-content-between p-3" style="border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                    <div>
+                        <span class="text-muted fw-bold small">GRAND TOTAL:</span>
+                        <input type="hidden" name="total_amount" class="grand-total-input" value="{{ $closingAmount ?? 0 }}">
+                        <span class="grand-total-display h4 text-danger fw-bold ms-2">₱ {{ number_format($closingAmount ?? 0, 2) }}</span>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary" style="border-radius: 10px;" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4" style="border-radius: 10px;">Save Changes</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 @endif
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        function calculateTotal(containerId) {
+            let grandTotal = 0;
+            $(`#${containerId} tbody tr`).each(function() {
+                const denomText = $(this).find('td:first').text().replace(/[^\d.-]/g, '');
+                const denom = parseFloat(denomText);
+                const qty = parseFloat($(this).find('input[type="number"]').val()) || 0;
+                
+                if (!isNaN(denom)) {
+                    const rowTotal = denom * qty;
+                    $(this).find('.row-total').text('₱ ' + rowTotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+                    grandTotal += rowTotal;
+                }
+            });
+            $(`#${containerId} .grand-total-display`).text('₱ ' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+            $(`#${containerId} .grand-total-input`).val(grandTotal);
+        }
+
+        $('input[type="number"]').on('input', function() {
+            const containerId = $(this).closest('.modal').attr('id');
+            calculateTotal(containerId);
+        });
+    });
+</script>
+@endpush
 
 @endsection

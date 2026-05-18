@@ -161,12 +161,7 @@
                                                 data-is-split-payment="{{ $entry->is_split_payment }}"
                                                 data-cash-amount="{{ $entry->cash_amount }}"
                                                 data-online-amount="{{ $entry->online_amount }}"
-                                                data-online-payment-method="{{ $entry->online_payment_method }}"
-                                                data-d1000="{{ $entry->denom_1000 }}" data-d500="{{ $entry->denom_500 }}"
-                                                data-d200="{{ $entry->denom_200 }}" data-d100="{{ $entry->denom_100 }}"
-                                                data-d50="{{ $entry->denom_50 }}" data-d20="{{ $entry->denom_20 }}"
-                                                data-c20="{{ $entry->coin_20 }}" data-c10="{{ $entry->coin_10 }}"
-                                                data-c5="{{ $entry->coin_5 }}" data-c1="{{ $entry->coin_1 }}">
+                                                data-online-payment-method="{{ $entry->online_payment_method }}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
 
@@ -318,79 +313,7 @@
                             </div>
                         </div>
 
-                        <div class="denomination-container mb-3"
-                            style="display: block; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <h6 class="text-primary mb-3" style="font-size: 11px; letter-spacing: 1px; font-weight: 800;">
-                                CASH DENOMINATION BREAKDOWN</h6>
-                            <div class="row">
-                                <div class="col-md-6 border-end">
-                                    <small class="text-muted d-block mb-2 font-weight-bold"
-                                        style="font-size: 10px;">BILLS</small>
-                                    <div class="row g-2">
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 1,000</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_1000" data-value="1000" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 500</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_500" data-value="500" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 200</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_200" data-value="200" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 100</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_100" data-value="100" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 50</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_50" data-value="50" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 20</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="denom_20" data-value="20" placeholder="0" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted d-block mb-2 font-weight-bold"
-                                        style="font-size: 10px;">COINS</small>
-                                    <div class="row g-2">
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 20 Coin</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="coin_20" data-value="20" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 10</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="coin_10" data-value="10" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 5</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="coin_5" data-value="5" placeholder="0" min="0">
-                                        </div>
-                                        <div class="col-6 mb-2">
-                                            <label class="small mb-0">₱ 1</label>
-                                            <input type="number" class="form-control form-control-sm denom-input"
-                                                name="coin_1" data-value="1" placeholder="0" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-2 text-end border-top pt-2">
-                                <small class="font-weight-bold text-primary">Cash Total: ₱ <span
-                                        class="denom-total">0.00</span></small>
-                            </div>
-                        </div>
+
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-check form-switch">
@@ -565,88 +488,7 @@
                                 </select>
                             </div>
 
-                            <div class="denomination-container mb-3"
-                                style="display: block; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <h6 class="text-primary mb-3"
-                                    style="font-size: 11px; letter-spacing: 1px; font-weight: 800;">CASH DENOMINATION
-                                    BREAKDOWN</h6>
-                                <div class="row">
-                                    <div class="col-md-6 border-end">
-                                        <small class="text-muted d-block mb-2 font-weight-bold"
-                                            style="font-size: 10px;">BILLS</small>
-                                        <div class="row g-2">
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 1,000</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_1000" id="edit_denom_1000" data-value="1000" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 500</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_500" id="edit_denom_500" data-value="500" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 200</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_200" id="edit_denom_200" data-value="200" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 100</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_100" id="edit_denom_100" data-value="100" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 50</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_50" id="edit_denom_50" data-value="50" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 20</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="denom_20" id="edit_denom_20" data-value="20" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <small class="text-muted d-block mb-2 font-weight-bold"
-                                            style="font-size: 10px;">COINS</small>
-                                        <div class="row g-2">
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 20 </label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="coin_20" id="edit_coin_20" data-value="20" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 10</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="coin_10" id="edit_coin_10" data-value="10" placeholder="0"
-                                                    min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 5</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="coin_5" id="edit_coin_5" data-value="5" placeholder="0" min="0">
-                                            </div>
-                                            <div class="col-6 mb-2">
-                                                <label class="small mb-0">₱ 1</label>
-                                                <input type="number" class="form-control form-control-sm denom-input"
-                                                    name="coin_1" id="edit_coin_1" data-value="1" placeholder="0" min="0">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-2 text-end border-top pt-2">
-                                    <small class="font-weight-bold text-primary">Cash Total: ₱ <span
-                                            class="denom-total">0.00</span></small>
-                                </div>
-                            </div>
+
 
                             <div class="row mb-3">
                                 <div class="col-12">
@@ -764,47 +606,7 @@
                 }
             });
 
-            // Denomination Logic
-            function calculateDenomTotal(modal) {
-                let total = 0;
-                modal.find('.denom-input').each(function () {
-                    const count = parseInt($(this).val()) || 0;
-                    const value = parseFloat($(this).data('value')) || 0;
-                    total += count * value;
-                });
-                modal.find('.denom-total').text(total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 
-                const method = modal.find('.payment-method-select').val();
-                const isSplit = modal.find('.split-payment-toggle').is(':checked');
-
-                if (method === 'CASH' && !isSplit) {
-                    modal.find('input[name="amount_paid"]').val(total.toFixed(2)).trigger('input');
-                } else if (isSplit) {
-                    modal.find('.split-cash-input').val(total.toFixed(2)).trigger('input');
-                }
-            }
-
-            $('.denom-input').on('input', function () {
-                const modal = $(this).closest('.modal-content');
-                calculateDenomTotal(modal);
-            });
-
-            function toggleDenominationContainer(modal) {
-                const method = modal.find('.payment-method-select').val();
-                const isSplit = modal.find('.split-payment-toggle').is(':checked');
-                const container = modal.find('.denomination-container');
-
-                if (method === 'CASH' || isSplit) {
-                    container.slideDown();
-                } else {
-                    container.slideUp();
-                }
-            }
-
-            $('.payment-method-select, .split-payment-toggle').on('change', function () {
-                const modal = $(this).closest('.modal-content');
-                toggleDenominationContainer(modal);
-            });
 
             // Initialize Select2
             $('.searchable-select').select2({
@@ -942,17 +744,7 @@
                 const isSplit = $(this).data('is-split-payment');
                 const cashAmount = $(this).data('cash-amount');
                 const onlineAmount = $(this).data('online-amount');
-                const onlineMethod = $(this).data('online-payment-method');
-                const d1000 = $(this).data('d1000');
-                const d500 = $(this).data('d500');
-                const d200 = $(this).data('d200');
-                const d100 = $(this).data('d100');
-                const d50 = $(this).data('d50');
-                const d20 = $(this).data('d20');
-                const c20 = $(this).data('c20');
-                const c10 = $(this).data('c10');
-                const c5 = $(this).data('c5');
-                const c1 = $(this).data('c1');
+
 
                 $('#edit_patient_id').val(patientId).trigger('change');
                 $('#edit_time').val(time);
@@ -963,16 +755,7 @@
                 $('#edit_reference_number').val(reference);
                 $('#edit_remarks').val(remarks);
 
-                $('#edit_denom_1000').val(d1000 || '');
-                $('#edit_denom_500').val(d500 || '');
-                $('#edit_denom_200').val(d200 || '');
-                $('#edit_denom_100').val(d100 || '');
-                $('#edit_denom_50').val(d50 || '');
-                $('#edit_denom_20').val(d20 || '');
-                $('#edit_coin_20').val(c20 || '');
-                $('#edit_coin_10').val(c10 || '');
-                $('#edit_coin_5').val(c5 || '');
-                $('#edit_coin_1').val(c1 || '');
+
 
                 if (isSplit) {
                     $('#edit_is_split_payment').prop('checked', true).trigger('change');
@@ -1003,8 +786,6 @@
                 }
 
                 $('#edit_payment_method').trigger('change');
-                toggleDenominationContainer($('#editEntryModal'));
-                calculateDenomTotal($('#editEntryModal'));
                 $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
