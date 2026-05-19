@@ -222,7 +222,7 @@
             }
         });
 
-        $('.edit-patient').on('click', function() {
+        $(document).on('click', '.edit-patient', function() {
             const id = $(this).data('id');
             const name = $(this).data('name');
             const age = $(this).data('age');

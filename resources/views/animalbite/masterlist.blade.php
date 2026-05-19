@@ -125,7 +125,7 @@
                                 @foreach($entries as $entry)
                                     <tr
                                         class="{{ in_array($entry->id, $pendingRequests) ? 'row-pending' : (in_array($entry->id, $approvedRequests) ? 'row-approved' : '') }}">
-                                        <td>{{ \Carbon\Carbon::parse($entry->time)->format('h:i A') }}</td>
+                                        <td data-order="{{ $entry->time }}">{{ \Carbon\Carbon::parse($entry->time)->format('h:i A') }}</td>
                                         <td class="text-start font-weight-bold">{{ $entry->patient->name }}</td>
                                         <td>{{ $entry->patient->age }}</td>
                                         <td>{{ $entry->patient->gender }}</td>
@@ -598,6 +598,7 @@
                 "ordering": true,
                 "info": true,
                 "searching": true,
+                "order": [[0, 'desc']],
                 "language": {
                     "paginate": {
                         "next": '<i class="fa fa-angle-right"></i>',
@@ -727,7 +728,7 @@
                 }
             });
 
-            $('.edit-entry').on('click', function () {
+            $(document).on('click', '.edit-entry', function () {
                 const id = $(this).data('id');
                 const patientId = $(this).data('patient-id');
                 const time = $(this).data('time');
@@ -744,6 +745,7 @@
                 const isSplit = $(this).data('is-split-payment');
                 const cashAmount = $(this).data('cash-amount');
                 const onlineAmount = $(this).data('online-amount');
+                const onlineMethod = $(this).data('online-payment-method');
 
 
                 $('#edit_patient_id').val(patientId).trigger('change');
@@ -789,7 +791,7 @@
                 $('#editEntryForm').attr('action', `/animal-bite/masterlist/${id}`);
             });
 
-            $('.request-delete').on('click', function () {
+            $(document).on('click', '.request-delete', function () {
                 const id = $(this).data('id');
                 $('#deleteRequestForm').attr('action', `/animal-bite/masterlist/${id}`);
             });

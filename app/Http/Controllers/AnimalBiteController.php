@@ -361,7 +361,7 @@ class AnimalBiteController extends Controller
     public function masterlist()
     {
         $date = session('selected_date', Carbon::today()->toDateString());
-        $entries = MasterlistEntry::with('patient')->whereDate('created_at', $date)->latest()->get();
+        $entries = MasterlistEntry::with('patient')->whereDate('created_at', $date)->orderBy('time', 'desc')->get();
         $patients = Patient::orderBy('name')->get();
 
         // Get IDs of entries with pending/approved requests for highlighting
