@@ -19,13 +19,25 @@ class AnimalBiteController extends Controller
     {
         $request->validate([
             'selected_date' => 'required|date',
-            'selected_branch' => 'nullable|string'
+            'selected_branch' => 'nullable|string',
+            'selected_region' => 'nullable|string|in:Cebu,Bohol,Cebu and Bohol'
         ]);
         
         session(['selected_date' => $request->selected_date]);
         
-        if (auth()->user()->is_super_admin && $request->has('selected_branch')) {
-            session(['selected_branch' => $request->selected_branch]);
+        if (auth()->user()->is_super_admin) {
+            if ($request->has('selected_region')) {
+                $oldRegion = session('selected_region', 'Cebu and Bohol');
+                $newRegion = $request->selected_region;
+                session(['selected_region' => $newRegion]);
+                
+                if ($oldRegion !== $newRegion) {
+                    session(['selected_branch' => 'All Branches']);
+                }
+            }
+            if ($request->has('selected_branch')) {
+                session(['selected_branch' => $request->selected_branch]);
+            }
         }
         
         return redirect()->back();
@@ -99,6 +111,35 @@ class AnimalBiteController extends Controller
         // Expected Cash in Drawer = (Opening Cash + Today's Cash Sales) - Today's Deductions
         $expectedCash = ($openingCash + $totalCashSales) - $totalDeductions;
 
+        // Calculate breakdown for online sales
+        $onlinePaymentMethods = ['GCASH', 'GCASH1', 'GCASH2', 'GCASH3', 'GCASH4', 'BPI', 'BDO', 'GOTYME', 'MARIBANK', 'MAYA'];
+        $onlineSalesBreakdown = [];
+        foreach ($onlinePaymentMethods as $method) {
+            $onlineSalesBreakdown[$method] = 0;
+        }
+        $onlineSalesBreakdown['ALL'] = $totalOnlineSales;
+
+        $todayEntriesForOnline = MasterlistEntry::whereDate('created_at', $date)
+            ->where(function($q) use ($onlinePaymentMethods) {
+                $q->whereIn('payment_method', $onlinePaymentMethods)
+                  ->orWhere('payment_method', 'SPLIT');
+            })
+            ->get(['payment_method', 'amount_paid', 'online_amount', 'online_payment_method']);
+
+        foreach ($todayEntriesForOnline as $entry) {
+            if (strtoupper($entry->payment_method) === 'SPLIT') {
+                $method = strtoupper($entry->online_payment_method);
+                if (isset($onlineSalesBreakdown[$method])) {
+                    $onlineSalesBreakdown[$method] += $entry->online_amount;
+                }
+            } else {
+                $method = strtoupper($entry->payment_method);
+                if (isset($onlineSalesBreakdown[$method])) {
+                    $onlineSalesBreakdown[$method] += $entry->amount_paid;
+                }
+            }
+        }
+
         return view('animalbite.dashboard', [
             'title' => 'Dashboard - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
@@ -113,6 +154,7 @@ class AnimalBiteController extends Controller
                 'online_sales' => $totalOnlineSales,
                 'opening_cash' => $openingCash
             ],
+            'onlineSalesBreakdown' => $onlineSalesBreakdown,
             'isEditable' => $isEditable,
             'selectedDate' => $date
         ]);

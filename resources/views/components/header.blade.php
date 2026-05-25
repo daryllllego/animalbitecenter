@@ -22,6 +22,23 @@
                         </div>
 
                         @if(auth()->user()->is_super_admin)
+                        <div class="date-filter-wrapper me-4">
+                            <label class="date-filter-label">SELECT PROVINCE</label>
+                            <div class="date-input-container">
+                                <i class="fa fa-map calendar-icon"></i>
+                                <select name="selected_region" onchange="document.getElementById('global-filter-form').submit()" class="modern-date-input" style="padding-right: 40px; -webkit-appearance: none;">
+                                    @php
+                                        $regions = ['Cebu and Bohol', 'Cebu', 'Bohol'];
+                                        $currentRegion = session('selected_region', 'Cebu and Bohol');
+                                    @endphp
+                                    @foreach($regions as $region)
+                                        <option value="{{ $region }}" {{ $currentRegion == $region ? 'selected' : '' }}>{{ $region }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa fa-chevron-down" style="position: absolute; right: 12px; color: #2953e8; pointer-events: none;"></i>
+                            </div>
+                        </div>
+
                         <div class="date-filter-wrapper">
                             <label class="date-filter-label">SELECT BRANCH</label>
                             <div class="date-input-container">
@@ -29,13 +46,14 @@
                                 <select name="selected_branch" onchange="document.getElementById('global-filter-form').submit()" class="modern-date-input" style="padding-right: 40px; -webkit-appearance: none;">
                                     <option value="All Branches" {{ session('selected_branch') == 'All Branches' ? 'selected' : '' }}>All Branches</option>
                                     @php
-                                        $branches = [
-                                            'Mandaue Branch', 'Lapu-Lapu Branch', 'Balamban Branch', 'Talisay Branch', 
-                                            'Bogo Branch', 'Tubigon Branch', 'Guadalupe Branch', 'Inabanga Branch', 
-                                            'Tagbilaran Branch', 'Talibon Branch', 'Camotes Branch', 'Consolacion Branch', 
-                                            'Carmen Branch', 'Panglao Branch', 'Liloan Branch', 'Jagna Branch', 'Ubay Branch',
-                                            'Carreta Branch'
-                                        ];
+                                        $region = session('selected_region', 'Cebu and Bohol');
+                                        $branchAccountsQuery = \DB::table('users')->where('is_branch_account', true);
+                                        if ($region === 'Cebu') {
+                                            $branchAccountsQuery->where('email', 'like', '%cabc%');
+                                        } elseif ($region === 'Bohol') {
+                                            $branchAccountsQuery->where('email', 'like', '%babc%');
+                                        }
+                                        $branches = $branchAccountsQuery->orderBy('branch')->pluck('branch')->unique()->toArray();
                                     @endphp
                                     @foreach($branches as $branch)
                                         <option value="{{ $branch }}" {{ session('selected_branch') == $branch ? 'selected' : '' }}>{{ $branch }}</option>

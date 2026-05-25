@@ -87,7 +87,7 @@
         <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="text-primary font-w600">CEBU AND BOHOL ANIMAL BITE CLINIC -
-                    {{ auth()->user()->is_super_admin && session('selected_branch') != 'All Branches' ? strtoupper(session('selected_branch')) : (auth()->user()->is_super_admin ? 'ALL BRANCHES' : strtoupper(auth()->user()->branch)) }}
+                    {{ auth()->user()->is_super_admin && session('selected_branch') != 'All Branches' ? strtoupper(session('selected_branch')) : (auth()->user()->is_super_admin ? (session('selected_region') == 'Cebu' ? 'ALL CEBU BRANCHES' : (session('selected_region') == 'Bohol' ? 'ALL BOHOL BRANCHES' : 'ALL BRANCHES')) : strtoupper(auth()->user()->branch)) }}
                 </h2>
                 <p class="text-muted">Filtered Date: <span class="badge bg-primary px-3 py-2"
                         style="font-size: 14px;">{{ \Carbon\Carbon::parse($selectedDate)->format('F d, Y') }}</span></p>
@@ -151,10 +151,27 @@
         <div class="col-xl-6 col-sm-6 mb-4">
             <div class="card kpi-card bg-secondary-light border-start border-secondary border-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="kpi-title">TOTAL ONLINE SALES</div>
+                        @if(auth()->user()->is_super_admin)
+                            <div>
+                                <select id="onlinePaymentFilter" class="form-select form-select-sm border-secondary text-secondary font-weight-bold" style="border-radius: 6px; font-size: 11px; padding: 2px 10px 2px 5px; height: auto; background-color: rgba(255, 255, 255, 0.85); min-width: 130px; cursor: pointer;">
+                                    <option value="ALL">ALL PAYMENTS</option>
+                                    <option value="GCASH">GCASH</option>
+                                    <option value="GCASH1">GCASH1</option>
+                                    <option value="GCASH2">GCASH2</option>
+                                    <option value="GCASH3">GCASH3</option>
+                                    <option value="GCASH4">GCASH4</option>
+                                    <option value="BPI">BPI</option>
+                                    <option value="BDO">BDO</option>
+                                    <option value="GOTYME">GOTYME</option>
+                                    <option value="MARIBANK">MARIBANK</option>
+                                    <option value="MAYA">MAYA</option>
+                                </select>
+                            </div>
+                        @endif
                     </div>
-                    <div class="kpi-value text-secondary">₱ {{ number_format($stats['online_sales'], 2) }}</div>
+                    <div class="kpi-value text-secondary" id="onlineSalesValue">₱ {{ number_format($stats['online_sales'], 2) }}</div>
                 </div>
             </div>
         </div>
@@ -347,6 +364,22 @@
                     $('#edit_amount').val(amount);
                     $('#edit_released_to').val(released_to);
                 });
+
+                @if(auth()->user()->is_super_admin)
+                const onlineSalesBreakdown = @json($onlineSalesBreakdown);
+
+                $('#onlinePaymentFilter').on('change', function () {
+                    const selectedMethod = $(this).val();
+                    const value = onlineSalesBreakdown[selectedMethod] || 0;
+                    
+                    const formattedValue = '₱ ' + new Intl.NumberFormat('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(value);
+                    
+                    $('#onlineSalesValue').text(formattedValue);
+                });
+                @endif
             });
         </script>
     @endpush

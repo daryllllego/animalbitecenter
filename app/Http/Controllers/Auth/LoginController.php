@@ -45,9 +45,14 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
             
-            // Set default branch for super admin if not set
-            if ($user->is_super_admin && !session('selected_branch')) {
-                session(['selected_branch' => 'All Branches']);
+            // Set default branch and region for super admin if not set
+            if ($user->is_super_admin) {
+                if (!session('selected_branch')) {
+                    session(['selected_branch' => 'All Branches']);
+                }
+                if (!session('selected_region')) {
+                    session(['selected_region' => 'Cebu and Bohol']);
+                }
             }
             
             return redirect()->intended(route('animal-bite.dashboard'));
