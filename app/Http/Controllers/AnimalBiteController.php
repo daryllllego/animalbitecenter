@@ -683,7 +683,7 @@ class AnimalBiteController extends Controller
         }
 
         return view('animalbite.inventory', [
-            'title' => 'Vaccination Inventory - Animal Bite Center',
+            'title' => 'Vaccine Inventory - Animal Bite Center',
             'role' => auth()->user()->position ?? 'Administrator',
             'sidebar' => 'animal-bite',
             'opening' => $opening,

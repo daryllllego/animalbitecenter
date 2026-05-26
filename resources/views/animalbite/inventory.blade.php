@@ -64,7 +64,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
-                <h2 class="inventory-header mb-0">VACCINATION INVENTORY</h2>
+                <h2 class="inventory-header mb-0">VACCINE INVENTORY</h2>
             </div>
             <div class="card-body">
                 <ul class="nav nav-tabs nav-tabs-custom mb-4" id="inventoryTabs" role="tablist">
@@ -86,7 +86,7 @@
                             'ACTIVE Anti-Rabies Vaccine' => ['Abhayrab', 'Speeda', 'Vaxirab N', 'Verorab'],
                             'PASSIVE Anti-Rabies Vaccine' => ['Vinrab (ERIG)', 'Equirab (ERIG)', 'Berirab (HRIG)'],
                             'Tetanus Toxoid' => ['Abhaytox'],
-                            'Tetanus Immunoglobulin' => ['Serotet', 'Tetagam']
+                            'Tetanus Immunoglobulin' => ['Serotet', 'Tetagam', 'Ig Tetano']
                         ];
                         $shiftData = [
                             'opening' => $opening,

@@ -127,7 +127,7 @@
                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
                     </svg>
                 </div>
-                <span class="modern-nav-text">Vaccination Inventory</span>
+                <span class="modern-nav-text">Vaccine Inventory</span>
             </a>
         </li>
     </ul>
