@@ -92,7 +92,7 @@
                 <span class="modern-nav-text">Masterlist</span>
             </a>
         </li>
-        @if(auth()->user()->position === 'Super Admin')
+        @if(auth()->user()->is_super_admin)
         <li class="{{ request()->routeIs('animal-bite.approval-queue') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.approval-queue') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">

@@ -104,7 +104,7 @@
 
     <div class="row">
         <!-- ROW 1 -->
-        <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="col-xl-{{ auth()->user()->position === 'Service Admin' ? '6' : '3' }} col-sm-6 mb-4">
             <div class="card kpi-card bg-primary-light border-start border-primary border-4">
                 <div class="card-body">
                     <div class="kpi-title">TOTAL PATIENTS FOR TODAY</div>
@@ -112,6 +112,7 @@
                 </div>
             </div>
         </div>
+        @if(auth()->user()->position !== 'Service Admin')
         <div class="col-xl-3 col-sm-6 mb-4">
             <div class="card kpi-card bg-success-light border-start border-success border-4">
                 <div class="card-body">
@@ -120,7 +121,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-4">
+        @endif
+        <div class="col-xl-{{ auth()->user()->position === 'Service Admin' ? '6' : '3' }} col-sm-6 mb-4">
             <div class="card kpi-card bg-danger-light border-start border-danger border-4">
                 <div class="card-body">
                     <div class="kpi-title">TOTAL DEDUCTIONS</div>
@@ -128,6 +130,7 @@
                 </div>
             </div>
         </div>
+        @if(auth()->user()->position !== 'Service Admin')
         <div class="col-xl-3 col-sm-6 mb-4">
             <div class="card kpi-card bg-warning-light border-start border-warning border-4">
                 <div class="card-body">
@@ -137,8 +140,10 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- ROW 2 -->
+        @if(auth()->user()->position !== 'Service Admin')
         <div class="col-xl-6 col-sm-6 mb-4">
             <div class="card kpi-card bg-info-light border-start border-info border-4">
                 <div class="card-body">
@@ -147,8 +152,9 @@
                 </div>
             </div>
         </div>
+        @endif
 
-        <div class="col-xl-6 col-sm-6 mb-4">
+        <div class="col-xl-{{ auth()->user()->position === 'Service Admin' ? '12' : '6' }} col-sm-6 mb-4">
             <div class="card kpi-card bg-secondary-light border-start border-secondary border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">

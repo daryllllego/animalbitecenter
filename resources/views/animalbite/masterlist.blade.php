@@ -165,7 +165,7 @@
                                                 <i class="fa fa-edit"></i>
                                             </button>
 
-                                            @if(auth()->user()->position === 'Super Admin')
+                                            @if(auth()->user()->is_super_admin)
                                                 <form action="{{ route('animal-bite.masterlist.destroy', $entry->id) }}"
                                                     method="POST" class="d-inline">
                                                     @csrf
@@ -540,7 +540,7 @@
                             <textarea class="form-control" id="edit_remarks" name="remarks" rows="2"></textarea>
                         </div>
 
-                        @if(auth()->user()->position !== 'Super Admin')
+                        @if(!auth()->user()->is_super_admin)
                             <div class="mb-3">
                                 <label for="edit_reason" class="form-label text-danger font-weight-bold">Reason for Edit
                                     (Required for Approval)</label>

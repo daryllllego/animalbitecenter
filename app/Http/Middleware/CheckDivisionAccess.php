@@ -21,7 +21,7 @@ class CheckDivisionAccess
         $user = Auth::user();
 
         // Super admins have access to everything
-        if ($user->position === 'Super Admin') {
+        if ($user->is_super_admin) {
             return $next($request);
         }
 

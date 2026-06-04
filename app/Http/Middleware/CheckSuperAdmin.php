@@ -19,7 +19,7 @@ class CheckSuperAdmin
     {
         $user = Auth::user();
 
-        if ($user->position !== 'Super Admin') {
+        if (!$user->is_super_admin) {
             abort(403, 'Unauthorized. Only Super Admins can access this resource.');
         }
 

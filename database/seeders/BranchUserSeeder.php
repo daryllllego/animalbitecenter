@@ -29,6 +29,21 @@ class BranchUserSeeder extends Seeder
             ]
         );
 
+        // Service Admin
+        \App\Models\User::updateOrCreate(
+            ['email' => 'serviceadmin@gmail.com'],
+            [
+                'first_name' => 'Service',
+                'last_name' => 'Admin',
+                'password' => '$2y$10$to4ehBQEVJqM5qvwZBeAM.Kg0tyxtV2szypyRtcSyKSpCbzfkXyzC',
+                'plain_password' => '123456789',
+                'is_super_admin' => true,
+                'position' => 'Service Admin',
+                'branch' => 'All Branches',
+                'status' => true
+            ]
+        );
+
         $users = [
             ['first_name' => 'Nemia Bless', 'last_name' => 'Ederango', 'branch' => 'Mandaue Branch', 'email' => 'nemiabless.ederango@gmail.com'],
             ['first_name' => 'John Paul', 'last_name' => 'Hynson', 'branch' => 'Lapu-Lapu Branch', 'email' => 'johnpaulhynson1999@gmail.com'],

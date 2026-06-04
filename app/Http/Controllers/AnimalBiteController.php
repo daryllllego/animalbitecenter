@@ -505,7 +505,7 @@ class AnimalBiteController extends Controller
             $validated['payment_method'] = 'SPLIT';
         }
 
-        if (auth()->user()->position !== 'Super Admin') {
+        if (!auth()->user()->is_super_admin) {
             ApprovalRequest::create([
                 'model_type' => MasterlistEntry::class,
                 'model_id' => $entry->id,
@@ -527,7 +527,7 @@ class AnimalBiteController extends Controller
 
     public function destroyEntry(Request $request, MasterlistEntry $entry)
     {
-        if (auth()->user()->position !== 'Super Admin') {
+        if (!auth()->user()->is_super_admin) {
             $request->validate(['reason' => 'required|string']);
             
             ApprovalRequest::create([
@@ -1079,7 +1079,7 @@ class AnimalBiteController extends Controller
     }
     public function approvalQueue()
     {
-        if (auth()->user()->position !== 'Super Admin') {
+        if (!auth()->user()->is_super_admin) {
             abort(403);
         }
 
@@ -1097,7 +1097,7 @@ class AnimalBiteController extends Controller
 
     public function approveRequest(ApprovalRequest $approvalRequest)
     {
-        if (auth()->user()->position !== 'Super Admin') {
+        if (!auth()->user()->is_super_admin) {
             abort(403);
         }
 
@@ -1118,7 +1118,7 @@ class AnimalBiteController extends Controller
 
     public function rejectRequest(ApprovalRequest $approvalRequest)
     {
-        if (auth()->user()->position !== 'Super Admin') {
+        if (!auth()->user()->is_super_admin) {
             abort(403);
         }
 

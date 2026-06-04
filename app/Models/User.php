@@ -123,6 +123,6 @@ class User extends Authenticatable
      */
     public function getIsSuperAdminAttribute()
     {
-        return $this->position === 'Super Admin' || $this->attributes['is_super_admin'];
+        return $this->position === 'Super Admin' || $this->position === 'Service Admin' || $this->attributes['is_super_admin'];
     }
 }
