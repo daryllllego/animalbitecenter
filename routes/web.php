@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['nurse.on.duty'])->prefix('animal-bite')->name('animal-bite.')->group(function () {
         Route::get('/dashboard', [AnimalBiteController::class, 'dashboard'])->name('dashboard');
         Route::get('/monthly-report', [AnimalBiteController::class, 'monthlyReport'])->name('monthly-report');
+        Route::get('/weekly-patient', [AnimalBiteController::class, 'weeklyPatient'])->name('weekly-patient');
         Route::get('/export-daily', [AnimalBiteController::class, 'exportDailyReport'])->name('export-daily');
         Route::get('/export-monthly', [AnimalBiteController::class, 'exportMonthlyReport'])->name('export-monthly');
         Route::get('/cash-on-hand', [AnimalBiteController::class, 'cashOnHand'])->name('cash-on-hand');

@@ -720,6 +720,65 @@ class AnimalBiteController extends Controller
         return redirect()->back()->with('success', 'Inventory saved successfully!');
     }
 
+    public function weeklyPatient(Request $request)
+    {
+        if (!auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        // Default to current week if no week is provided
+        $week = $request->get('week', \Carbon\Carbon::now()->format('Y-\WW'));
+        $dateParts = explode('-W', $week);
+        if(count($dateParts) == 2) {
+            $year = $dateParts[0];
+            $weekNum = $dateParts[1];
+        } else {
+            $year = \Carbon\Carbon::now()->format('Y');
+            $weekNum = \Carbon\Carbon::now()->format('W');
+        }
+
+        $startOfWeek = \Carbon\Carbon::now()->setISODate($year, $weekNum)->startOfWeek();
+        $endOfWeek = $startOfWeek->copy()->endOfWeek();
+        
+        $selectedBranch = session('selected_branch', 'All Branches');
+
+        $query = \App\Models\MasterlistEntry::query()
+            ->whereBetween('created_at', [$startOfWeek->copy()->startOfDay(), $endOfWeek->copy()->endOfDay()]);
+
+        if ($selectedBranch !== 'All Branches') {
+            $query->where('branch', $selectedBranch);
+        }
+
+        // Get daily counts
+        $dailyData = $query->selectRaw('DATE(created_at) as date, COUNT(*) as total_patients')
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $results = [];
+        $totalPatients = 0;
+        
+        for ($date = $startOfWeek->copy(); $date->lte($endOfWeek); $date->addDay()) {
+            $dateString = $date->format('Y-m-d');
+            $count = $dailyData->has($dateString) ? $dailyData->get($dateString)->total_patients : 0;
+            $results[] = [
+                'date' => $date->format('l, M d, Y'),
+                'patients' => $count
+            ];
+            $totalPatients += $count;
+        }
+
+        return view('animalbite.weekly-patient', [
+            'title' => 'Weekly Patient Report - ' . $startOfWeek->format('M d') . ' to ' . $endOfWeek->format('M d, Y'),
+            'role' => auth()->user()->position,
+            'sidebar' => 'animal-bite',
+            'week' => $week,
+            'results' => $results,
+            'totalPatients' => $totalPatients,
+            'selectedBranch' => $selectedBranch
+        ]);
+    }
+
     public function monthlyReport(Request $request)
     {
         if (!auth()->user()->is_super_admin) {
