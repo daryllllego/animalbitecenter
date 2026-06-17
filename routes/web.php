@@ -61,6 +61,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/approval-queue/{approvalRequest}/approve', [AnimalBiteController::class, 'approveRequest'])->name('approval-queue.approve');
         Route::post('/approval-queue/{approvalRequest}/reject', [AnimalBiteController::class, 'rejectRequest'])->name('approval-queue.reject');
 
+        // Deduction Approval Routes
+        Route::get('/deduction-approval', [AnimalBiteController::class, 'deductionApproval'])->name('deduction-approval');
+        Route::post('/deduction-approval/{deduction}/approve', [AnimalBiteController::class, 'approveDeduction'])->name('deduction-approval.approve');
+        Route::post('/deduction-approval/{deduction}/decline', [AnimalBiteController::class, 'declineDeduction'])->name('deduction-approval.decline');
+
         // User Management Routes (Super Admin Only)
         Route::middleware(['super.admin'])->group(function () {
             Route::get('/users', [App\Http\Controllers\UserManagementController::class, 'index'])->name('users.index');

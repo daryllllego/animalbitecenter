@@ -1,5 +1,6 @@
 <div class="modern-nav-section">
     <ul class="modern-nav-menu">
+        @if(auth()->user()->position !== 'Deduction Admin')
         <li class="{{ request()->routeIs('animal-bite.dashboard') ? 'active' : '' }}">
             <a href="{{ route('animal-bite.dashboard') }}" class="modern-nav-link">
                 <div class="modern-nav-icon">
@@ -143,5 +144,20 @@
                 <span class="modern-nav-text">Vaccine Inventory</span>
             </a>
         </li>
+        @endif
+
+        @if(auth()->user()->is_super_admin || auth()->user()->position === 'Deduction Admin')
+        <li class="{{ request()->routeIs('animal-bite.deduction-approval') ? 'active' : '' }}">
+            <a href="{{ route('animal-bite.deduction-approval') }}" class="modern-nav-link">
+                <div class="modern-nav-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                </div>
+                <span class="modern-nav-text">Deduction Approval</span>
+            </a>
+        </li>
+        @endif
     </ul>
 </div>

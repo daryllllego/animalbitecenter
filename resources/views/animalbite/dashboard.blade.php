@@ -205,6 +205,7 @@
                                     <th>RELEASED BY</th>
                                     <th>AMOUNT</th>
                                     <th>RELEASED TO</th>
+                                    <th>STATUS</th>
                                     <th>ACTION</th>
                                 </tr>
                             </thead>
@@ -219,6 +220,17 @@
                                         <td class="font-weight-bold text-danger">₱ {{ number_format($deduction->amount, 2) }}
                                         </td>
                                         <td>{{ $deduction->released_to }}</td>
+                                        <td>
+                                            @if($deduction->status == 'pending')
+                                                <span class="badge bg-warning">Pending</span>
+                                            @elseif($deduction->status == 'approved')
+                                                <span class="badge bg-success">Approved</span>
+                                            @elseif($deduction->status == 'declined')
+                                                <span class="badge bg-danger">Declined</span>
+                                            @else
+                                                <span class="badge bg-secondary">{{ ucfirst($deduction->status) }}</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <div class="d-flex">
                                                 <button type="button"
@@ -246,7 +258,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-muted text-center py-4">No deductions recorded for this
+                                        <td colspan="6" class="text-muted text-center py-4">No deductions recorded for this
                                             date.</td>
                                     </tr>
                                 @endforelse

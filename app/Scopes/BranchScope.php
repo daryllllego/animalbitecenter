@@ -54,7 +54,19 @@ class BranchScope implements Scope
                 }
                 // If 'All Branches' under 'Cebu and Bohol', show everything
             } else {
-                $builder->where($model->getTable() . '.branch', $user->branch);
+                if ($user->position === 'Deduction Admin') {
+                    if ($user->branch === 'Cebu') {
+                        $branches = self::getBranchesForRegion('Cebu');
+                        $builder->whereIn($model->getTable() . '.branch', $branches);
+                    } elseif ($user->branch === 'Bohol') {
+                        $branches = self::getBranchesForRegion('Bohol');
+                        $builder->whereIn($model->getTable() . '.branch', $branches);
+                    } else {
+                        $builder->where($model->getTable() . '.branch', $user->branch);
+                    }
+                } else {
+                    $builder->where($model->getTable() . '.branch', $user->branch);
+                }
             }
         }
     }

@@ -28,5 +28,6 @@ class Deduction extends Model
         'coin_10',
         'coin_5',
         'coin_1',
+        'status',
     ];
 }

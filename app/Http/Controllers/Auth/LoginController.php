@@ -35,8 +35,8 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            // Allow only Super Admins and Branch Accounts to login directly to the main login page
-            if (!$user->is_super_admin && !$user->is_branch_account && $user->position !== 'Branch Account') {
+            // Allow only Super Admins, Branch Accounts, and Deduction Admins to login directly to the main login page
+            if (!$user->is_super_admin && !$user->is_branch_account && $user->position !== 'Branch Account' && $user->position !== 'Deduction Admin') {
                 Auth::logout();
                 return back()->withErrors([
                     'email' => 'Direct login is disabled for staff accounts. Please use the "Nurse on Duty" feature through your branch account.',
@@ -53,6 +53,10 @@ class LoginController extends Controller
                 if (!session('selected_region')) {
                     session(['selected_region' => 'Cebu and Bohol']);
                 }
+            }
+            
+            if ($user->position === 'Deduction Admin') {
+                return redirect()->intended(route('animal-bite.deduction-approval'));
             }
             
             return redirect()->intended(route('animal-bite.dashboard'));

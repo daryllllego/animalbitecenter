@@ -57,6 +57,7 @@ class AnimalBiteController extends Controller
             ->sum(\DB::raw('CASE WHEN payment_method = "SPLIT" THEN cash_amount ELSE amount_paid END'));
             
         $historicalDeductions = Deduction::where('date', '<', $date)
+            ->where('status', 'approved')
             ->sum('amount');
             
         $defaultOpeningCash = $historicalSales - $historicalDeductions;
@@ -89,7 +90,7 @@ class AnimalBiteController extends Controller
         
         $totalPatients = MasterlistEntry::whereDate('created_at', $date)->count();
         $totalSales = MasterlistEntry::whereDate('created_at', $date)->sum('amount_paid');
-        $totalDeductions = Deduction::whereDate('date', $date)->sum('amount');
+        $totalDeductions = Deduction::whereDate('date', $date)->where('status', 'approved')->sum('amount');
         
         // New Calculations
         $totalOnlineSales = MasterlistEntry::whereDate('created_at', $date)
@@ -278,6 +279,7 @@ class AnimalBiteController extends Controller
             ->when($branch !== 'All Branches', function($q) use ($branch) {
                 return $q->where('branch', $branch);
             })
+            ->where('status', 'approved')
             ->sum('amount');
             
         $expectedCash = ($openingAmount + $totalCashSales) - $totalDeductions;
@@ -596,7 +598,8 @@ class AnimalBiteController extends Controller
             'amount' => $validated['amount'],
             'released_to' => $validated['released_to'],
             'date' => $date,
-            'branch' => $branch
+            'branch' => $branch,
+            'status' => 'pending'
         ];
 
 
@@ -796,7 +799,8 @@ class AnimalBiteController extends Controller
 
         $deductionsQuery = Deduction::query()
             ->whereMonth('date', $month)
-            ->whereYear('date', $year);
+            ->whereYear('date', $year)
+            ->where('status', 'approved');
 
         $dailyRecordsQuery = DailyRecord::query()
             ->whereMonth('date', $month)
@@ -1183,6 +1187,44 @@ class AnimalBiteController extends Controller
 
         $approvalRequest->update(['status' => 'rejected']);
         return redirect()->back()->with('warning', 'Request rejected.');
+    }
+
+    public function deductionApproval()
+    {
+        if (auth()->user()->position !== 'Deduction Admin' && !auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $pending = Deduction::where('status', 'pending')->latest()->get();
+        $history = Deduction::where('status', '!=', 'pending')->latest()->limit(50)->get();
+
+        return view('animalbite.deduction-approval', [
+            'title' => 'Deduction Approval',
+            'role' => auth()->user()->position ?? 'Administrator',
+            'sidebar' => 'animal-bite',
+            'pending' => $pending,
+            'history' => $history,
+        ]);
+    }
+
+    public function approveDeduction(Deduction $deduction)
+    {
+        if (auth()->user()->position !== 'Deduction Admin' && !auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $deduction->update(['status' => 'approved']);
+        return redirect()->back()->with('success', 'Deduction approved successfully.');
+    }
+
+    public function declineDeduction(Deduction $deduction)
+    {
+        if (auth()->user()->position !== 'Deduction Admin' && !auth()->user()->is_super_admin) {
+            abort(403);
+        }
+
+        $deduction->update(['status' => 'declined']);
+        return redirect()->back()->with('success', 'Deduction declined successfully.');
     }
 }
 
