@@ -100,3 +100,35 @@
 .modern-sidebar-footer strong {
     color: #5a6a85 !important;
 }
+
+/* Ensure text doesn't wrap and overflows gracefully */
+.modern-nav-menu .modern-nav-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Menu toggle state (collapsed sidebar) */
+[data-sidebar-style="mini"] .modern-nav-menu .modern-nav-text,
+.menu-toggle .modern-nav-menu .modern-nav-text,
+[data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .modern-nav-menu .modern-nav-text {
+    display: none !important;
+}
+
+[data-sidebar-style="mini"] .modern-nav-menu .modern-nav-link,
+.menu-toggle .modern-nav-menu .modern-nav-link,
+[data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .modern-nav-menu .modern-nav-link {
+    padding: 12px !important;
+    justify-content: center !important;
+    margin-right: 0 !important;
+    border-radius: 50% !important;
+    width: 64px !important;
+    height: 64px !important;
+    margin: 0 auto 8px auto !important;
+}
+
+[data-sidebar-style="mini"] .modern-nav-menu .modern-nav-icon,
+.menu-toggle .modern-nav-menu .modern-nav-icon,
+[data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .modern-nav-menu .modern-nav-icon {
+    margin-right: 0 !important;
+}
